@@ -76,14 +76,6 @@ export default function Footer() {
                   Community
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
-                  Pricing
-                </a>
-              </li>
             </ul>
           </div>
 

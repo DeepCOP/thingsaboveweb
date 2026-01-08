@@ -51,7 +51,7 @@ export default function CTA() {
 
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-emerald-50 leading-relaxed">
             Join thousands of believers growing in faith through consistent,
-            community-driven Bible reading. Start your free plan today.
+            community-driven Bible reading. Start today.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -65,9 +65,6 @@ export default function CTA() {
             </motion.button>
           </div>
 
-          <p className="text-sm text-emerald-100">
-            No credit card required • Free forever • Cancel anytime
-          </p>
         </motion.div>
       </div>
     </section>

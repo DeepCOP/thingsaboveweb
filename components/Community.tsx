@@ -113,7 +113,7 @@ export default function Community() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                        Morning Prayer Group
+                        Morning Prayer
                       </p>
                       <p className="text-xs text-neutral-500 dark:text-neutral-400">
                         24 members

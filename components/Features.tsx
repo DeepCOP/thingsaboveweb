@@ -1,10 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BookOpen, Calendar, Users, MessageCircle } from 'lucide-react';
+import { BookOpen, Calendar, Users, MessageCircle, Bot} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const features = [
+
   {
     icon: BookOpen,
     title: 'Daily Devotional Plans',
@@ -16,6 +17,13 @@ const features = [
     title: 'Track Your Reading Progress',
     description:
       'Monitor your spiritual journey with visual progress tracking, reading streaks, and completion milestones that keep you motivated.',
+  },
+        {
+    icon: Bot,
+    title: 'AI Assistant for Deeper Insights',
+    description:
+      'Get instant explanations, historical context, and thematic connections for any verse or passage with our integrated AI assistant.',
+      span: 2,
   },
   {
     icon: Users,
@@ -29,6 +37,7 @@ const features = [
     description:
       'Record personal reflections, share thoughts with your group, and engage in meaningful discussions about daily readings.',
   },
+
 ];
 
 export default function Features() {
@@ -78,7 +87,7 @@ export default function Features() {
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group relative p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-neutral-200 dark:border-neutral-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300"
+              className={`group relative p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-neutral-200  dark:border-neutral-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300 ${feature.span === 2 ? 'md:col-span-2 md:max-w-xl md:mx-auto' : ''}`}
             >
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
