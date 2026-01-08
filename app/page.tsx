@@ -15,6 +15,7 @@ export default function Home() {
       <HowItWorks />
       <Community />
       <CTA />
+      <Footer />
     </main>
   );
 }
