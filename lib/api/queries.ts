@@ -35,3 +35,12 @@ export const getMyDevotionalPlans = async () => {
   if (error) throw error;
   return data;
 };
+
+export const getDevotionalDays = async (planId: string) => {
+  const { data, error } = await supabase.rpc('get_devotional_days_with_scriptures', {
+    p_plan_id: planId,
+  });
+
+  if (error) throw error;
+  return data;
+};

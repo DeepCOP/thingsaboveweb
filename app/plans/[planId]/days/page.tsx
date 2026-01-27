@@ -14,7 +14,7 @@ import { useGetDevotionalById } from '@/lib/hooks/useDevotional';
 import Spinner from '@/components/ui/Spinner';
 import { useSaveDevotionalDraft } from '@/lib/hooks/useSaveDraft';
 import { useAuth } from '@/state/AuthContext';
-import { useDevotionalDays, useGetDevotionalDrafts } from '@/lib/hooks/useDevotionalDays';
+import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/lib/hooks/useDevotionalDays';
 import Image from 'next/image';
 type Day = {
   id: string; // ✅ stable identity
@@ -30,7 +30,7 @@ export default function PlanDaysPage() {
   const submitDevotionals = useSubmitDevotionalDays(planId as string, session?.user?.id);
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
-  const devotionalDays = useDevotionalDays(planId as string, session?.user?.id);
+  const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);
   const draftsQuery = useGetDevotionalDrafts(planId as string, session?.user?.id);
   const drafts = draftsQuery.data;
   const initializedRef = useRef(false);

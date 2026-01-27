@@ -8,7 +8,7 @@ export function useGetDevotionalById(id: string, userId: string | undefined) {
   return useQuery({
     queryKey: ['devotional-plan', id, userId],
     enabled: !!id && !!userId,
-    queryFn: id && userId ? async () => getDevotionalById(id) : () => undefined,
+    queryFn: async () => getDevotionalById(id),
   });
 }
 
@@ -24,7 +24,7 @@ export function useGetPlanReports(user_id: string | undefined, planIds: string[]
   return useQuery({
     queryKey: ['my-devotiional-plans-reports', user_id, planIds],
     enabled: !!user_id && !!planIds.length,
-    queryFn: !!user_id && !!planIds.length ? async () => getPlansReports(planIds) : () => [],
+    queryFn: async () => getPlansReports(planIds),
   });
 }
 
