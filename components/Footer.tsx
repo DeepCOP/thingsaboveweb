@@ -19,29 +19,26 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-neutral-600 dark:text-neutral-400 mb-4 max-w-md">
-              Grow your faith one day at a time with daily devotionals, reading
-              plans, and a supportive community.
+              Grow your faith one day at a time with daily devotionals, reading plans, and a
+              supportive community.
             </p>
             <div className="flex items-center space-x-4">
               <a
                 href="#"
                 className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                aria-label="Twitter"
-              >
+                aria-label="Twitter">
                 <Twitter className="h-5 w-5" />
               </a>
               <a
                 href="#"
                 className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                aria-label="Instagram"
-              >
+                aria-label="Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
               <a
                 href="#"
                 className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                aria-label="Github"
-              >
+                aria-label="Github">
                 <Github className="h-5 w-5" />
               </a>
             </div>
@@ -55,24 +52,21 @@ export default function Footer() {
               <li>
                 <a
                   href="#features"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Features
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Reading Plans
                 </a>
               </li>
               <li>
                 <a
                   href="#community"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Community
                 </a>
               </li>
@@ -87,32 +81,28 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   About
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Privacy
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Terms
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Contact
                 </a>
               </li>
@@ -127,8 +117,7 @@ export default function Footer() {
             </p>
             <button
               onClick={scrollToTop}
-              className="mt-4 md:mt-0 text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
-            >
+              className="mt-4 md:mt-0 text-sm text-emerald-600 dark:text-emerald-400 hover:underline">
               Back to top ↑
             </button>
           </div>

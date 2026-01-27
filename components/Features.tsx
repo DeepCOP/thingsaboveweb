@@ -1,11 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BookOpen, Calendar, Users, MessageCircle, Bot} from 'lucide-react';
+import { BookOpen, Calendar, Users, MessageCircle, Bot } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const features = [
-
   {
     icon: BookOpen,
     title: 'Daily Devotional Plans',
@@ -18,12 +17,12 @@ const features = [
     description:
       'Monitor your spiritual journey with visual progress tracking, reading streaks, and completion milestones that keep you motivated.',
   },
-        {
+  {
     icon: Bot,
     title: 'AI Assistant for Deeper Insights',
     description:
       'Get instant explanations, historical context, and thematic connections for any verse or passage with our integrated AI assistant.',
-      span: 2,
+    span: 2,
   },
   {
     icon: Users,
@@ -37,7 +36,6 @@ const features = [
     description:
       'Record personal reflections, share thoughts with your group, and engage in meaningful discussions about daily readings.',
   },
-
 ];
 
 export default function Features() {
@@ -50,7 +48,7 @@ export default function Features() {
           setInView(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const element = document.getElementById('features');
@@ -66,8 +64,7 @@ export default function Features() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+          className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white mb-4">
             Everything You Need to
             <span className="block mt-2 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -75,8 +72,8 @@ export default function Features() {
             </span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg text-neutral-600 dark:text-neutral-300">
-            Powerful features designed to make daily Bible reading engaging,
-            consistent, and community-driven.
+            Powerful features designed to make daily Bible reading engaging, consistent, and
+            community-driven.
           </p>
         </motion.div>
 
@@ -87,8 +84,7 @@ export default function Features() {
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={`group relative p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-neutral-200  dark:border-neutral-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300 ${feature.span === 2 ? 'md:col-span-2 md:max-w-xl md:mx-auto' : ''}`}
-            >
+              className={`group relative p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-neutral-200  dark:border-neutral-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300 ${feature.span === 2 ? 'md:col-span-2 md:max-w-xl md:mx-auto' : ''}`}>
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">

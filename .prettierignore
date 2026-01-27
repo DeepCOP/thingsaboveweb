@@ -1,0 +1,16 @@
+dist/
+coverage/
+node_modules/
+/assets/
+/data/
+/public/
+.next/
+*.mjs
+*.cjs
+*.tsbuildinfo
+*.d.ts
+*.js.map
+*.ts.map
+*.log
+*.prettierrc
+*.md

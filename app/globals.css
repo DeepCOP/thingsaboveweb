@@ -87,3 +87,26 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+.ProseMirror {
+  font-size: 15px;
+  min-height: 160px;
+  line-height: 1.7;
+  padding-left: 4px;
+  background-color: white;
+}
+
+.ProseMirror p {
+  margin: 0.5rem 0;
+}
+
+.ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.ProseMirror a {
+  color: #4f46e5;
+  text-decoration: underline;
+}

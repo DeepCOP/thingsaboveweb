@@ -14,7 +14,7 @@ export default function Community() {
           setInView(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const element = document.getElementById('community');
@@ -30,8 +30,7 @@ export default function Community() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
+            transition={{ duration: 0.6 }}>
             <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white mb-6">
               Faith is Better
               <span className="block mt-2 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -39,10 +38,9 @@ export default function Community() {
               </span>
             </h2>
             <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-8 leading-relaxed">
-              Join reading groups, share insights, and support one another on
-              your faith journey. Our community features help you stay
-              accountable and inspired through shared experiences and meaningful
-              conversations.
+              Join reading groups, share insights, and support one another on your faith journey.
+              Our community features help you stay accountable and inspired through shared
+              experiences and meaningful conversations.
             </p>
 
             <div className="space-y-4">
@@ -94,8 +92,7 @@ export default function Community() {
             initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="relative"
-          >
+            className="relative">
             <div className="relative bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-950 dark:to-blue-950 rounded-3xl p-8 shadow-2xl">
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-emerald-500 rounded-full opacity-20 blur-2xl" />
               <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-blue-500 rounded-full opacity-20 blur-2xl" />
@@ -115,14 +112,12 @@ export default function Community() {
                       <p className="text-sm font-semibold text-neutral-900 dark:text-white">
                         Morning Prayer
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                        24 members
-                      </p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">24 members</p>
                     </div>
                   </div>
                   <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
-                    This passage reminds me to trust in Gods timing, even when
-                    things feel uncertain...
+                    This passage reminds me to trust in Gods timing, even when things feel
+                    uncertain...
                   </p>
                   <div className="flex items-center space-x-4 mt-4">
                     <button className="flex items-center space-x-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400">
