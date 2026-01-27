@@ -41,7 +41,7 @@ export default function HowItWorks() {
           setInView(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const element = document.getElementById('how-it-works');
@@ -51,17 +51,13 @@ export default function HowItWorks() {
   }, []);
 
   return (
-    <section
-      id="how-it-works"
-      className="py-24 bg-neutral-50 dark:bg-neutral-950"
-    >
+    <section id="how-it-works" className="py-24 bg-neutral-50 dark:bg-neutral-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+          className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white mb-4">
             Simple Steps to
             <span className="block mt-2 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -69,8 +65,7 @@ export default function HowItWorks() {
             </span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg text-neutral-600 dark:text-neutral-300">
-            Get started in minutes and build a lasting habit of daily Bible
-            reading.
+            Get started in minutes and build a lasting habit of daily Bible reading.
           </p>
         </motion.div>
 
@@ -84,8 +79,7 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: index * 0.15 }}
-                className="relative"
-              >
+                className="relative">
                 <div className="flex flex-col items-center text-center">
                   <div className="relative mb-6">
                     <div className="w-20 h-20 rounded-2xl bg-white dark:bg-neutral-900 shadow-lg flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
