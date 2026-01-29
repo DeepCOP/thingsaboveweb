@@ -1,10 +1,10 @@
-import Navigation from '@/components/Navigation';
-import Hero from '@/components/Hero';
-import Features from '@/components/Features';
-import HowItWorks from '@/components/HowItWorks';
-import Community from '@/components/Community';
-import CTA from '@/components/CTA';
-import Footer from '@/components/Footer';
+import Navigation from '@/src/components/Navigation';
+import Hero from '@/src/components/Hero';
+import Features from '@/src/components/Features';
+import HowItWorks from '@/src/components/HowItWorks';
+import Community from '@/src/components/Community';
+import CTA from '@/src/components/CTA';
+import Footer from '@/src/components/Footer';
 
 export default function Home() {
   return (

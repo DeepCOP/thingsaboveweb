@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/src/lib/supabaseClient';
 import { getDevotionalDays, getDevotionalDrafts } from '../api/queries';
 export function useGetDevotionalDays(planId: string, userId: string | undefined) {
   return useQuery({

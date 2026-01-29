@@ -1,4 +1,4 @@
-import { Reports } from '@/types/types';
+import { Reports } from '@/src/types/types';
 import PlanStatsCard from './PlanStatsCard';
 import { Edit, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';

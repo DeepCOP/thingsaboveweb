@@ -1,10 +1,10 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
-import QueryProvider from '@/lib/queryClient';
-import { AuthProvider } from '@/state/AuthContext';
-import Navigation from '@/components/Navigation';
+import { ThemeProvider } from '@/src/components/theme-provider';
+import QueryProvider from '@/src/lib/queryClient';
+import { AuthProvider } from '@/src/state/AuthContext';
+import Navigation from '@/src/components/Navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 

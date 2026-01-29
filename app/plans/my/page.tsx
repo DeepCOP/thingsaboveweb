@@ -1,14 +1,14 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import Spinner from '@/components/ui/Spinner';
+import Spinner from '@/src/components/ui/Spinner';
 import {
   useDeleteDevotionalPlan,
   useGetPlanReports,
   useMyDevotionalPlans,
-} from '@/lib/hooks/useDevotional';
-import { useAuth } from '@/state/AuthContext';
-import PlanCard from '@/components/PlanCard';
+} from '@/src/hooks/useDevotional';
+import { useAuth } from '@/src/state/AuthContext';
+import PlanCard from '@/src/components/PlanCard';
 
 export default function MyPlansPage() {
   const { session, loading: sessionLoading } = useAuth();

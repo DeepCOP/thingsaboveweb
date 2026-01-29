@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/client';
-import { DevotionalDayInput } from '@/types/types';
-import supabase from '../supabaseClient';
+import { createClient } from '@/src/lib/supabase/client';
+import { DevotionalDayInput } from '@/src/types/types';
+import supabase from '../lib/supabaseClient';
 
 export async function getDevotionalById(id: string) {
   const { data, error } = await supabase.from('devotional_plans').select('*').eq('id', id).single();

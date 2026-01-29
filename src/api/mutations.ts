@@ -3,8 +3,8 @@ import {
   DevotionalPlan,
   DevotionalPlanInsert,
   DevotionalPlanUpdate,
-} from '@/types/types';
-import supabase from '../supabaseClient';
+} from '@/src/types/types';
+import supabase from '../lib/supabaseClient';
 
 export async function submitDevotionalDays(planId: string, days: DevotionalDayInput[]) {
   const { error } = await supabase.rpc('publish_devotional_plan', {

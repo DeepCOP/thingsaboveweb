@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { DevotionalDayInput } from '@/types/types';
+import { DevotionalDayInput } from '@/src/types/types';
 import { submitDevotionalDays } from '../api/mutations';
 
 export function useSubmitDevotionalDays(planId: string, userId: string | undefined) {

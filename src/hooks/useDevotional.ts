@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getDevotionalById, getMyDevotionalPlans, getPlansReports } from '../api/queries';
-import { DEvotionalPlanInput, DevotionalPlanInsert, DevotionalPlanUpdate } from '@/types/types';
-import supabase from '../supabaseClient';
+import { DEvotionalPlanInput, DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
+import supabase from '../lib/supabaseClient';
 import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
 
 export function useGetDevotionalById(id: string, userId: string | undefined) {

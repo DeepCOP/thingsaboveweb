@@ -2,19 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import RichTextEditor from '@/components/editor/RichTextEditor';
-import ScriptureSelector from '@/components/ScriptureSelector';
+import RichTextEditor from '@/src/components/editor/RichTextEditor';
+import ScriptureSelector from '@/src/components/ScriptureSelector';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, Menu, Trash2 } from 'lucide-react';
-import { useSubmitDevotionalDays } from '@/lib/hooks/useSummitDevotionalDays';
-import { useGetDevotionalById } from '@/lib/hooks/useDevotional';
-import Spinner from '@/components/ui/Spinner';
-import { useSaveDevotionalDraft } from '@/lib/hooks/useSaveDraft';
-import { useAuth } from '@/state/AuthContext';
-import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/lib/hooks/useDevotionalDays';
+import { useSubmitDevotionalDays } from '@/src/hooks/usePublishDevotionalDays';
+import { useGetDevotionalById } from '@/src/hooks/useDevotional';
+import Spinner from '@/src/components/ui/Spinner';
+import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
+import { useAuth } from '@/src/state/AuthContext';
+import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDevotionalDays';
 import Image from 'next/image';
 type Day = {
   id: string; // ✅ stable identity
@@ -253,7 +253,7 @@ export default function PlanDaysPage() {
         </button>
         <button
           onClick={() =>
-            saveDraft.mutate(days, {
+            saveDraft.mutate(normalizeDays(days), {
               onSuccess: () => {
                 alert('Draft saved 💾');
               },

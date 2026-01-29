@@ -1,4 +1,4 @@
-import { Database } from '@/types/supabase.gen.types';
+import { Database } from '@/src/types/supabase.gen.types';
 import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {

@@ -5,7 +5,7 @@ import { Moon, Sun, BookOpen } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/state/AuthContext';
+import { useAuth } from '@/src/state/AuthContext';
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/src/lib/supabaseClient';
 
 type AuthContextType = {
   session: Session | null;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ session, loading, isGuest, signOut }}>

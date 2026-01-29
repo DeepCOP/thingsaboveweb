@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/state/AuthContext';
-import { useGetDevotionalById, useUpdateDevotionalPlan } from '@/lib/hooks/useDevotional';
-import { uploadPlanCover } from '@/lib/utils';
-import Spinner from '@/components/ui/Spinner';
+import { useAuth } from '@/src/state/AuthContext';
+import { useGetDevotionalById, useUpdateDevotionalPlan } from '@/src/hooks/useDevotional';
+import { uploadPlanCover } from '@/src/lib/utils';
+import Spinner from '@/src/components/ui/Spinner';
 import Image from 'next/image';
 
 export default function EditPlanPage() {
@@ -29,6 +29,7 @@ export default function EditPlanPage() {
     }
     initializedRef.current = true;
   }, [planQuery.data]);
+
   if (planQuery.isLoading || sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -38,13 +39,15 @@ export default function EditPlanPage() {
   }
 
   if (!planQuery.data) {
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center px-4">
-      <p className="text-2xl">Couldn`&apos;`t Load This Plan!</p>
-    </div>;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center px-4">
+        <p className="text-2xl">Couldn`&apos;`t Load This Plan!</p>
+      </div>
+    );
   }
 
   const handleSave = async () => {
-    let coverUrl = planQuery.data?.cover_image;
+    let coverUrl = planQuery.data?.cover_image || undefined;
 
     if (coverFile && session) {
       setUploadingImage(true);
