@@ -2,10 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/src/lib/supabase/client';
 import { uploadPlanCover } from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
-import supabase from '@/src/lib/supabaseClient';
 import { useCreateDevotionalPlan } from '@/src/hooks/useDevotional';
 import Image from 'next/image';
 
