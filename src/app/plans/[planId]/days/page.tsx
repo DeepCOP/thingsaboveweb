@@ -9,7 +9,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-ki
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, Menu, Trash2 } from 'lucide-react';
-import { useGetDevotionalById, useSubmitDevotionalDays } from '@/src/hooks/useDevotionalPlan';
+import { useGetDevotionalById, usePublishDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
 import Spinner from '@/src/components/ui/Spinner';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { useAuth } from '@/src/state/AuthContext';
@@ -26,7 +26,7 @@ type Day = {
 export default function PlanDaysPage() {
   const { planId } = useParams();
   const { session, loading: sessionLoading } = useAuth();
-  const submitDevotionals = useSubmitDevotionalDays(planId as string, session?.user?.id);
+  const submitDevotionals = usePublishDevotionalPlan(planId as string, session?.user?.id);
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
   const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);

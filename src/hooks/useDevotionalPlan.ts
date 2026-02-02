@@ -60,7 +60,7 @@ export function useDeleteDevotionalPlan() {
   });
 }
 
-export function useSubmitDevotionalDays(planId: string, userId: string | undefined) {
+export function usePublishDevotionalPlan(planId: string, userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
