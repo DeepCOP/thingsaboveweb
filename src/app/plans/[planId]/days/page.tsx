@@ -9,8 +9,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-ki
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, Menu, Trash2 } from 'lucide-react';
-import { useSubmitDevotionalDays } from '@/src/hooks/usePublishDevotionalDays';
-import { useGetDevotionalById } from '@/src/hooks/useDevotional';
+import { useGetDevotionalById, useSubmitDevotionalDays } from '@/src/hooks/useDevotionalPlan';
 import Spinner from '@/src/components/ui/Spinner';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { useAuth } from '@/src/state/AuthContext';

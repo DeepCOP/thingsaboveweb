@@ -6,7 +6,7 @@ import {
   useDeleteDevotionalPlan,
   useGetPlanReports,
   useMyDevotionalPlans,
-} from '@/src/hooks/useDevotional';
+} from '@/src/hooks/useDevotionalPlan';
 import { useAuth } from '@/src/state/AuthContext';
 import PlanCard from '@/src/components/PlanCard';
 

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getDevotionalById, getMyDevotionalPlans, getPlansReports } from '../api/queries';
-import { DEvotionalPlanInput, DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
-import supabase from '../lib/supabaseClient';
+import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
+import { DevotionalDayInput } from '@/src/types/types';
+import { submitDevotionalDays } from '../api/mutations';
 
 export function useGetDevotionalById(id: string, userId: string | undefined) {
   return useQuery({
@@ -55,6 +56,30 @@ export function useDeleteDevotionalPlan() {
     mutationFn: async (planId: string) => deleteDevotionalPlan(planId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-devotional-plans'] });
+    },
+  });
+}
+
+export function useSubmitDevotionalDays(planId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (days: DevotionalDayInput[]) => submitDevotionalDays(planId, days),
+
+    onSuccess: () => {
+      // Invalidate related queries if needed
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-plan', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-drafts', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-days', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['my-devotional-plans', userId],
+      });
     },
   });
 }

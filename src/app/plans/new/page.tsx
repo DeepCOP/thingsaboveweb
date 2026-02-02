@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { uploadPlanCover } from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
-import { useCreateDevotionalPlan } from '@/src/hooks/useDevotional';
+import { useCreateDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
 import Image from 'next/image';
 
 export default function CreatePlanPage() {

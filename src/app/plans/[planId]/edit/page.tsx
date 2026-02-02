@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/src/state/AuthContext';
-import { useGetDevotionalById, useUpdateDevotionalPlan } from '@/src/hooks/useDevotional';
+import { useGetDevotionalById, useUpdateDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
 import { uploadPlanCover } from '@/src/lib/utils';
 import Spinner from '@/src/components/ui/Spinner';
 import Image from 'next/image';
