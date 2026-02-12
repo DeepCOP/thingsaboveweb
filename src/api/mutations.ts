@@ -23,6 +23,7 @@ export async function createDevotionalPlan(payload: DevotionalPlanInsert) {
     total_days: payload.total_days,
     author_id: payload.author_id,
     cover_image: payload.cover_image,
+    tags: payload.tags,
   });
 
   if (error) throw error;
@@ -43,6 +44,7 @@ export const updateDevotionalPlan = async (input: DevotionalPlanUpdate) => {
   if (!input.id) {
     return;
   }
+
   const { error } = await supabase
     .from('devotional_plans')
     .update({
@@ -50,6 +52,7 @@ export const updateDevotionalPlan = async (input: DevotionalPlanUpdate) => {
       description: input.description,
       total_days: input.total_days,
       cover_image: input.cover_image,
+      tags: input.tags,
     })
     .eq('id', input.id);
 

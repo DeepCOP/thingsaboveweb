@@ -18,14 +18,39 @@ export default function EditPlanPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const initializedRef = useRef(false);
+
+  const TITLE_MAX = 120;
+  const DESCRIPTION_MAX = 500;
+
+  const availableTags = [
+    'Prayer',
+    'Faith',
+    'Hope',
+    'Healing',
+    'Gratitude',
+    'Peace',
+    'Wisdom',
+    'Discipleship',
+    'Family',
+    'Leadership',
+  ];
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
+    );
+  };
 
   useEffect(() => {
     if (planQuery.data && !initializedRef.current) {
       setTitle(planQuery.data.title);
       setDescription(planQuery.data.description);
       setPreview(planQuery.data.cover_image);
+      const tags = Array.isArray(planQuery.data.tags) ? planQuery.data.tags.filter(Boolean) : [];
+      setSelectedTags(tags);
     }
     initializedRef.current = true;
   }, [planQuery.data]);
@@ -47,6 +72,16 @@ export default function EditPlanPage() {
   }
 
   const handleSave = async () => {
+    if (title.length > TITLE_MAX) {
+      alert(`Title must be ${TITLE_MAX} characters or fewer.`);
+      return;
+    }
+
+    if (description.length > DESCRIPTION_MAX) {
+      alert(`Description must be ${DESCRIPTION_MAX} characters or fewer.`);
+      return;
+    }
+
     let coverUrl = planQuery.data?.cover_image || undefined;
 
     if (coverFile && session) {
@@ -65,6 +100,7 @@ export default function EditPlanPage() {
         title,
         description,
         cover_image: coverUrl,
+        tags: selectedTags.length ? selectedTags : null,
       },
       {
         onSuccess: () => router.push('/plans/my'),
@@ -81,16 +117,47 @@ export default function EditPlanPage() {
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        maxLength={TITLE_MAX}
         className="w-full border rounded-lg p-3"
         placeholder="Title"
       />
+      <p className="text-xs text-gray-500">
+        {title.length}/{TITLE_MAX}
+      </p>
 
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        maxLength={DESCRIPTION_MAX}
         className="w-full border rounded-lg p-3"
         placeholder="Description"
       />
+      <p className="text-xs text-gray-500">
+        {description.length}/{DESCRIPTION_MAX}
+      </p>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+        <div className="flex flex-wrap gap-2">
+          {availableTags.map((tag) => {
+            const isSelected = selectedTags.includes(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={`rounded-full border px-3 py-1 text-sm transition ${
+                  isSelected
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                }`}>
+                {tag}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-sm text-gray-500 mt-2">Pick all that apply.</p>
+      </div>
       <div>
         {preview && (
           <Image

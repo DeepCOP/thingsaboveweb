@@ -4,10 +4,143 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '13.0.5';
+    PostgrestVersion: '14.1';
   };
   public: {
     Tables: {
+      ai_daily_messages: {
+        Row: {
+          content: string;
+          created_at: string | null;
+          id: string;
+          message_date: string;
+          type: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string | null;
+          id?: string;
+          message_date: string;
+          type: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string | null;
+          id?: string;
+          message_date?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
+      ai_notifications: {
+        Row: {
+          content: string | null;
+          created_at: string | null;
+          id: string;
+          message_id: string | null;
+          scheduled_for: string | null;
+          sent_at: string | null;
+          type: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          content?: string | null;
+          created_at?: string | null;
+          id?: string;
+          message_id?: string | null;
+          scheduled_for?: string | null;
+          sent_at?: string | null;
+          type?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          content?: string | null;
+          created_at?: string | null;
+          id?: string;
+          message_id?: string | null;
+          scheduled_for?: string | null;
+          sent_at?: string | null;
+          type?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ai_notifications_message_id_fkey';
+            columns: ['message_id'];
+            isOneToOne: false;
+            referencedRelation: 'ai_daily_messages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ai_notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ai_notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      ai_triggers: {
+        Row: {
+          context: Json;
+          created_at: string | null;
+          generated_message: string | null;
+          id: string;
+          priority: number | null;
+          sent: boolean | null;
+          sent_at: string | null;
+          trigger_reason: string;
+          trigger_type: string;
+          user_id: string;
+        };
+        Insert: {
+          context?: Json;
+          created_at?: string | null;
+          generated_message?: string | null;
+          id?: string;
+          priority?: number | null;
+          sent?: boolean | null;
+          sent_at?: string | null;
+          trigger_reason: string;
+          trigger_type: string;
+          user_id: string;
+        };
+        Update: {
+          context?: Json;
+          created_at?: string | null;
+          generated_message?: string | null;
+          id?: string;
+          priority?: number | null;
+          sent?: boolean | null;
+          sent_at?: string | null;
+          trigger_reason?: string;
+          trigger_type?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ai_triggers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ai_triggers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
       comments: {
         Row: {
           content: string;
@@ -83,6 +216,7 @@ export type Database = {
           item_type: string | null;
           plan_id: string | null;
           progress_id: string | null;
+          title: string | null;
           updated_at: string | null;
           user_id: string | null;
         };
@@ -98,6 +232,7 @@ export type Database = {
           item_type?: string | null;
           plan_id?: string | null;
           progress_id?: string | null;
+          title?: string | null;
           updated_at?: string | null;
           user_id?: string | null;
         };
@@ -113,6 +248,7 @@ export type Database = {
           item_type?: string | null;
           plan_id?: string | null;
           progress_id?: string | null;
+          title?: string | null;
           updated_at?: string | null;
           user_id?: string | null;
         };
@@ -253,7 +389,7 @@ export type Database = {
           description: string;
           id: string;
           status: string | null;
-          tags: string | null;
+          tags: string[] | null;
           title: string;
           total_days: number;
           updated_at: string | null;
@@ -266,7 +402,7 @@ export type Database = {
           description: string;
           id?: string;
           status?: string | null;
-          tags?: string | null;
+          tags?: string[] | null;
           title: string;
           total_days?: number;
           updated_at?: string | null;
@@ -279,7 +415,7 @@ export type Database = {
           description?: string;
           id?: string;
           status?: string | null;
-          tags?: string | null;
+          tags?: string[] | null;
           title?: string;
           total_days?: number;
           updated_at?: string | null;
@@ -317,11 +453,61 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'friends_receiver_id_fkey';
+            columns: ['receiver_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+          {
             foreignKeyName: 'friends_requester_id_fkey';
             columns: ['requester_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friends_requester_id_fkey';
+            columns: ['requester_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: {
+          created_at: string | null;
+          daily: boolean | null;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          daily?: boolean | null;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          daily?: boolean | null;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notification_preferences_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notification_preferences_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -364,6 +550,13 @@ export type Database = {
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
         ];
       };
       plan_group_members: {
@@ -402,6 +595,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plan_group_members_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -442,6 +642,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'plan_groups_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+          {
             foreignKeyName: 'plan_groups_plan_id_fkey';
             columns: ['plan_id'];
             isOneToOne: false;
@@ -460,6 +667,7 @@ export type Database = {
       plan_progress: {
         Row: {
           completed_days: number[] | null;
+          completed_once: boolean | null;
           created_at: string | null;
           current_day: number;
           group_id: string | null;
@@ -471,6 +679,7 @@ export type Database = {
         };
         Insert: {
           completed_days?: number[] | null;
+          completed_once?: boolean | null;
           created_at?: string | null;
           current_day?: number;
           group_id?: string | null;
@@ -482,6 +691,7 @@ export type Database = {
         };
         Update: {
           completed_days?: number[] | null;
+          completed_once?: boolean | null;
           created_at?: string | null;
           current_day?: number;
           group_id?: string | null;
@@ -560,9 +770,12 @@ export type Database = {
           bio: string | null;
           created_at: string | null;
           email: string;
+          expo_push_token: string | null;
           first_name: string;
           id: string;
           last_name: string;
+          last_seen: string | null;
+          timezone: string | null;
           updated_at: string | null;
         };
         Insert: {
@@ -570,9 +783,12 @@ export type Database = {
           bio?: string | null;
           created_at?: string | null;
           email: string;
+          expo_push_token?: string | null;
           first_name: string;
           id: string;
           last_name: string;
+          last_seen?: string | null;
+          timezone?: string | null;
           updated_at?: string | null;
         };
         Update: {
@@ -580,9 +796,12 @@ export type Database = {
           bio?: string | null;
           created_at?: string | null;
           email?: string;
+          expo_push_token?: string | null;
           first_name?: string;
           id?: string;
           last_name?: string;
+          last_seen?: string | null;
+          timezone?: string | null;
           updated_at?: string | null;
         };
         Relationships: [];
@@ -708,7 +927,8 @@ export type Database = {
           dislikes_count: number | null;
           id: string | null;
           likes_count: number | null;
-          tags: string | null;
+          status: string | null;
+          tags: string[] | null;
           title: string | null;
           total_days: number | null;
           updated_at: string | null;
@@ -722,7 +942,8 @@ export type Database = {
           dislikes_count?: never;
           id?: string | null;
           likes_count?: never;
-          tags?: string | null;
+          status?: string | null;
+          tags?: string[] | null;
           title?: string | null;
           total_days?: number | null;
           updated_at?: string | null;
@@ -736,10 +957,30 @@ export type Database = {
           dislikes_count?: never;
           id?: string | null;
           likes_count?: never;
-          tags?: string | null;
+          status?: string | null;
+          tags?: string[] | null;
           title?: string | null;
           total_days?: number | null;
           updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      user_behavior_snapshot: {
+        Row: {
+          abandoned_plans: number | null;
+          active_plans: number | null;
+          commented_recently: boolean | null;
+          has_friends: boolean | null;
+          has_group_plan: boolean | null;
+          last_activity_at: string | null;
+          last_seen: string | null;
+          max_days_completed: number | null;
+          plans_completed: number | null;
+          plans_started: number | null;
+          time_since_last_activity: unknown;
+          time_since_last_seen: unknown;
+          timezone: string | null;
+          user_id: string | null;
         };
         Relationships: [];
       };
@@ -798,6 +1039,38 @@ export type Database = {
           p_user_id: string;
         };
         Returns: undefined;
+      };
+      generate_ai_triggers: { Args: never; Returns: undefined };
+      get_day_items_progress: {
+        Args: {
+          p_day_id: string;
+          p_group_id?: string;
+          p_plan_id: string;
+          p_progress_id: string;
+          p_user_id: string;
+        };
+        Returns: {
+          completed: boolean | null;
+          created_at: string | null;
+          day_id: string | null;
+          day_number: number | null;
+          devotional_content: string | null;
+          group_id: string | null;
+          id: string;
+          item_key: string | null;
+          item_type: string | null;
+          plan_id: string | null;
+          progress_id: string | null;
+          title: string | null;
+          updated_at: string | null;
+          user_id: string | null;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'day_items_progress';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       get_devotional_days_with_scriptures: {
         Args: { p_plan_id: string };
@@ -886,6 +1159,8 @@ export type Database = {
           friendship_status: string;
           id: string;
           last_name: string;
+          receiver_id: string;
+          requester_id: string;
         }[];
       };
       is_group_member: { Args: { p_group_id: string }; Returns: boolean };
@@ -897,6 +1172,7 @@ export type Database = {
         Args: { p_days: Json; p_plan_id: string };
         Returns: undefined;
       };
+      queue_daily_notifications: { Args: never; Returns: undefined };
       report_plan: {
         Args: { p_plan_id: string; p_reason: string };
         Returns: undefined;
@@ -921,7 +1197,8 @@ export type Database = {
           dislikes_count: number | null;
           id: string | null;
           likes_count: number | null;
-          tags: string | null;
+          status: string | null;
+          tags: string[] | null;
           title: string | null;
           total_days: number | null;
           updated_at: string | null;
@@ -948,6 +1225,7 @@ export type Database = {
         };
         Returns: string;
       };
+      tags_to_text: { Args: { tags: string[] }; Returns: string };
       toggle_day_completion: {
         Args: {
           p_completed: boolean;
@@ -984,6 +1262,10 @@ export type Database = {
           p_first_name?: string;
           p_last_name?: string;
         };
+        Returns: undefined;
+      };
+      upsert_push_notification_setup: {
+        Args: { p_expo_push_token: string; p_timezone: string };
         Returns: undefined;
       };
     };
