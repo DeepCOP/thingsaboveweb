@@ -24,6 +24,7 @@ type Day = {
 };
 
 export default function PlanDaysPage() {
+  const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
   const { session, loading: sessionLoading } = useAuth();
   const submitDevotionals = usePublishDevotionalPlan(planId as string, session?.user?.id);
@@ -88,6 +89,13 @@ export default function PlanDaysPage() {
     console.log(payload);
     if (!payload.length) {
       alert('Atleast 1 day is required!');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Ready to publish this plan? You can still edit it later, but this will make it visible.',
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -205,10 +213,14 @@ export default function PlanDaysPage() {
                     type="text"
                     placeholder="Day title (optional)"
                     value={day.title}
+                    maxLength={DAY_TITLE_MAX}
                     onChange={(e) => updateDay(i, { title: e.target.value })}
                     className="w-full rounded-lg border px-4 py-2 text-sm
              focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
+                  <p className="text-xs text-gray-500">
+                    {day.title.length}/{DAY_TITLE_MAX}
+                  </p>
 
                   <RichTextEditor
                     value={day.content}

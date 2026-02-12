@@ -43,7 +43,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:3000'}/auth/confirm`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -51,7 +51,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         },
       });
       if (error) throw error;
-      router.push('/plans/my');
+      router.push(`/auth/confirm-email?email=${encodeURIComponent(email)}`);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
