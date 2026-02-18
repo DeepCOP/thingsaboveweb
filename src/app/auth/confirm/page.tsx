@@ -43,40 +43,17 @@ export default function ConfirmEmailPage() {
       }
 
       const supabase = createClient();
-      const code = searchParams.get('code');
-      const hasHashToken =
-        typeof window !== 'undefined' && window.location.hash.includes('access_token=');
 
       try {
-        if (code) {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) {
-            throw error;
-          }
-          if (!isActive) return;
-          setHasSession(Boolean(data.session));
+        const { data } = await supabase.auth.getSession();
+        if (!isActive) return;
+        if (data.session) {
+          setHasSession(true);
+
           setStatus('success');
         } else {
-          const { data } = await supabase.auth.getSession();
-          if (!isActive) return;
-          if (data.session) {
-            setHasSession(true);
-            setStatus('success');
-          } else if (hasHashToken) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            const { data: retry } = await supabase.auth.getSession();
-            if (!isActive) return;
-            if (retry.session) {
-              setHasSession(true);
-              setStatus('success');
-            } else {
-              setStatus('error');
-              setErrorMessage('This confirmation link is invalid or has expired.');
-            }
-          } else {
-            setStatus('error');
-            setErrorMessage('This confirmation link is invalid or has expired.');
-          }
+          setStatus('success');
+          setHasSession(false);
         }
       } catch (error: unknown) {
         if (!isActive) return;
