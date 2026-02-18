@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import RichTextEditor from '@/src/components/editor/RichTextEditor';
 import ScriptureSelector from '@/src/components/ScriptureSelector';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -26,6 +26,7 @@ type Day = {
 export default function PlanDaysPage() {
   const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
+  const router = useRouter();
   const { session, loading: sessionLoading } = useAuth();
   const submitDevotionals = usePublishDevotionalPlan(planId as string, session?.user?.id);
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
@@ -102,6 +103,7 @@ export default function PlanDaysPage() {
     submitDevotionals.mutate(payload, {
       onSuccess: () => {
         alert('Plan submitted 🎉');
+        router.push('/plans/my');
       },
       onError: (error) => {
         console.error(error);
