@@ -45,13 +45,15 @@ export default function EditPlanPage() {
   };
 
   useEffect(() => {
-    if (planQuery.data && !initializedRef.current) {
-      setTitle(planQuery.data.title);
-      setDescription(planQuery.data.description);
-      setPreview(planQuery.data.cover_image);
-      const tags = Array.isArray(planQuery.data.tags) ? planQuery.data.tags.filter(Boolean) : [];
-      setSelectedTags(tags);
+    if (!planQuery.data || initializedRef.current) {
+      return;
     }
+
+    setTitle(planQuery.data.title);
+    setDescription(planQuery.data.description);
+    setPreview(planQuery.data.cover_image);
+    const tags = Array.isArray(planQuery.data.tags) ? planQuery.data.tags.filter(Boolean) : [];
+    setSelectedTags(tags);
     initializedRef.current = true;
   }, [planQuery.data]);
 

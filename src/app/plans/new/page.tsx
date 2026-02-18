@@ -65,13 +65,6 @@ export default function CreatePlanPage() {
       return;
     }
 
-    const confirmed = window.confirm(
-      'Ready to publish this plan? You can still edit it later, but this will make it visible.',
-    );
-    if (!confirmed) {
-      return;
-    }
-
     let coverImageUrl: string | undefined;
     const planId = crypto.randomUUID();
 
