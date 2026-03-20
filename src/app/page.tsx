@@ -4,7 +4,6 @@ import Features from '@/src/components/Features';
 import HowItWorks from '@/src/components/HowItWorks';
 import Community from '@/src/components/Community';
 import CTA from '@/src/components/CTA';
-import Footer from '@/src/components/Footer';
 
 export default function Home() {
   return (
@@ -14,7 +13,6 @@ export default function Home() {
       <HowItWorks />
       <Community />
       <CTA />
-      <Footer />
     </main>
   );
 }
