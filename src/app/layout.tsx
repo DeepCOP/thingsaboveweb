@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/src/components/theme-provider';
 import QueryProvider from '@/src/lib/queryClient';
 import { AuthProvider } from '@/src/state/AuthContext';
 import Navigation from '@/src/components/Navigation';
+import Footer from '../components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
+        <Footer />
       </body>
     </html>
   );

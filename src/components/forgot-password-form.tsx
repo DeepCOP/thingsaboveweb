@@ -21,8 +21,9 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     setError(null);
 
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://thingsabove.life';
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/update-password`,
+        redirectTo: `${baseUrl}/auth/update-password`,
       });
       if (error) throw error;
       setSuccess(true);

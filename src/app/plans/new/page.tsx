@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+import { useCreateDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
 import { uploadPlanCover } from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
-import { useCreateDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
-import Image from 'next/image';
 
 export default function CreatePlanPage() {
   const router = useRouter();
-  const { session, loading: sessionLoading } = useAuth();
+  const { session } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [totalDays, setTotalDays] = useState(1);
@@ -72,15 +74,15 @@ export default function CreatePlanPage() {
       setUploadingImage(true);
       coverImageUrl = await uploadPlanCover({
         file: coverFile,
-        userId: session?.user.id,
-        planId: planId as string,
+        userId: session.user.id,
+        planId,
       });
       setUploadingImage(false);
     }
 
     createPlanMutation.mutate(
       {
-        author_id: session?.user.id,
+        author_id: session.user.id,
         id: planId,
         title,
         description,
@@ -92,7 +94,6 @@ export default function CreatePlanPage() {
         onError: (error) => {
           console.error(error);
           alert('Failed to create plan');
-          return;
         },
         onSuccess: () => {
           router.push(`/plans/${planId}/days`);
@@ -102,60 +103,70 @@ export default function CreatePlanPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-2xl bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-200 p-8">
-        {/* Header */}
+    <div className="flex min-h-screen items-center justify-center px-4 mb-20">
+      <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:bg-black">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
             Create Devotional Plan
           </h1>
-          <p className="text-gray-500 dark:text-gray-200 mt-2">
+          <p className="mt-2 text-gray-500 dark:text-gray-200">
             Start by giving your devotional a title and short introduction.
           </p>
         </div>
 
-        {/* Title */}
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+          <p className="font-semibold">Content standards</p>
+          <p className="mt-2 leading-6">
+            All submitted devotional content must not violate historical Christian principles.
+            ThingsAbove strictly enforces this standard. Review the{' '}
+            <Link href="/terms" className="underline underline-offset-4">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/statement-of-faith" className="underline underline-offset-4">
+              Statement of Faith
+            </Link>{' '}
+            before you publish.
+          </p>
+        </div>
+
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Plan Title
           </label>
           <input
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 dark:text-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             placeholder="e.g. Walking with God"
             value={title}
             maxLength={TITLE_MAX}
             required
             onChange={(e) => setTitle(e.target.value)}
           />
-          <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
             {title.length}/{TITLE_MAX}
           </p>
         </div>
 
-        {/* Description */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Short Description
           </label>
           <textarea
             rows={4}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 dark:text-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             placeholder="What is this devotional about?"
             value={description}
             maxLength={DESCRIPTION_MAX}
             required
             onChange={(e) => setDescription(e.target.value)}
           />
-          <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
             {description.length}/{DESCRIPTION_MAX}
           </p>
         </div>
 
-        {/* Tags */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Tags
           </label>
           <div className="flex flex-wrap gap-2">
@@ -176,11 +187,11 @@ export default function CreatePlanPage() {
               );
             })}
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">Pick all that apply.</p>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">Pick all that apply.</p>
         </div>
-        {/* Cover Image */}
+
         <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Cover Image (optional)
           </label>
 
@@ -193,10 +204,7 @@ export default function CreatePlanPage() {
               setCoverFile(file);
               setCoverPreview(URL.createObjectURL(file));
             }}
-            className="block w-full text-sm text-gray-500
-               file:mr-4 file:rounded-full file:border-0
-               file:bg-indigo-50 file:px-4 file:py-2
-               file:text-indigo-600 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-indigo-600 hover:file:bg-indigo-100"
           />
 
           {coverPreview && (
@@ -204,7 +212,7 @@ export default function CreatePlanPage() {
               <Image
                 src={coverPreview}
                 alt="Cover preview"
-                className="h-48 w-full object-cover rounded-xl"
+                className="h-48 w-full rounded-xl object-cover"
                 width={100}
                 height={100}
               />
@@ -212,17 +220,15 @@ export default function CreatePlanPage() {
           )}
         </div>
 
-        {/* Total Days */}
         <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Number of Days
           </label>
           <input
             type="number"
             min={1}
             max={MAX_DAYS}
-            className="w-32 rounded-lg border border-gray-300 px-4 py-3 text-gray-900 dark:text-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-32 rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             value={totalDays}
             required
             onChange={(e) => {
@@ -234,19 +240,20 @@ export default function CreatePlanPage() {
               setTotalDays(Math.min(Math.max(nextValue, 1), MAX_DAYS));
             }}
           />
-          <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
-            You’ll add the content for each day next.
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            You&apos;ll add the content for each day next.
           </p>
         </div>
 
-        {/* Action */}
         <div className="flex justify-end">
           <button
             onClick={createPlan}
             disabled={disabled}
-            className={`inline-flex items-center gap-2 rounded-full ${disabled ? ' opacity-50 cursor-not-allowed ' : ''} bg-indigo-600 px-6 py-3 text-white font-medium hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500`}>
+            className={`inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              disabled ? 'cursor-not-allowed opacity-50' : ''
+            }`}>
             {createPlanMutation.isPending || uploadingImage ? 'Creating...' : 'Continue'}
-            <span className="text-lg">→</span>
+            <span className="text-lg">-&gt;</span>
           </button>
         </div>
       </div>

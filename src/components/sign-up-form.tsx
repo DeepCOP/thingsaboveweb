@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { Checkbox } from '@/src/components/ui/checkbox';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import Link from 'next/link';
@@ -17,33 +18,43 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+  const LEGAL_CONSENT_ERROR =
+    'You must agree to the Terms of Service and Statement of Faith to create an account.';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
     setError(null);
 
     if (password !== repeatPassword) {
       setError('Passwords do not match');
-      setIsLoading(false);
+      return;
+    }
+
+    if (!acceptedPolicies) {
+      setError(LEGAL_CONSENT_ERROR);
       return;
     }
 
     try {
+      const supabase = createClient();
+      setIsLoading(true);
+
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://thingsabove.life';
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:3000'}/auth/confirm`,
+          emailRedirectTo: `${baseUrl}/auth/confirm`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -125,6 +136,36 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
+              </div>
+              <div className="rounded-lg border border-slate-200 p-4">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="legal-consent"
+                    checked={acceptedPolicies}
+                    onCheckedChange={(checked) => {
+                      const isChecked = checked === true;
+                      setAcceptedPolicies(isChecked);
+                      if (isChecked && error === LEGAL_CONSENT_ERROR) {
+                        setError(null);
+                      }
+                    }}
+                    className="mt-1"
+                  />
+                  <Label
+                    htmlFor="legal-consent"
+                    className="text-sm font-normal leading-6 text-slate-600">
+                    I agree to the{' '}
+                    <Link href="/terms" className="underline underline-offset-4">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/statement-of-faith" className="underline underline-offset-4">
+                      Statement of Faith
+                    </Link>
+                    , including the rule that submitted content may not violate historical Christian
+                    principles and that this standard is strictly enforced.
+                  </Label>
+                </div>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>

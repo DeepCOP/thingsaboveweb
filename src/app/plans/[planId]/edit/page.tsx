@@ -111,7 +111,7 @@ export default function EditPlanPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 rounded-2xl shadow-sm border border-gray-200">
+    <div className="max-w-3xl mx-auto p-6 space-y-6 rounded-2xl shadow-sm border border-gray-200 mb-20">
       <h1 className="text-2xl font-bold">Edit Devotional Plan</h1>
 
       {/* Cover */}

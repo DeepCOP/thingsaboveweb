@@ -1,22 +1,30 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import RichTextEditor from '@/src/components/editor/RichTextEditor';
-import ScriptureSelector from '@/src/components/ScriptureSelector';
 import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, Menu, Trash2 } from 'lucide-react';
-import { useGetDevotionalById, usePublishDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
+
+import ScriptureSelector from '@/src/components/ScriptureSelector';
+import RichTextEditor from '@/src/components/editor/RichTextEditor';
 import Spinner from '@/src/components/ui/Spinner';
+import { Checkbox } from '@/src/components/ui/checkbox';
+import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDevotionalDays';
+import { useGetDevotionalById, usePublishDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { useAuth } from '@/src/state/AuthContext';
-import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDevotionalDays';
-import Image from 'next/image';
+
 type Day = {
-  id: string; // ✅ stable identity
+  id: string;
   day_number: number;
   content: string;
   scriptures: string[];
@@ -38,19 +46,21 @@ export default function PlanDaysPage() {
 
   const daysData = useMemo(() => {
     if (!planQuery.data) return [];
-    return [...Array(planQuery.data?.total_days)].map((i, idx) => {
-      return {
-        day_number: idx + 1,
-        content: '',
-        scriptures: [],
-        id: crypto.randomUUID(),
-        title: '',
-      };
-    });
-  }, [planQuery.data]);
-  const [days, setDays] = useState<Day[]>(daysData);
 
+    return [...Array(planQuery.data.total_days)].map((_, idx) => ({
+      day_number: idx + 1,
+      content: '',
+      scriptures: [],
+      id: crypto.randomUUID(),
+      title: '',
+    }));
+  }, [planQuery.data]);
+
+  const [days, setDays] = useState<Day[]>(daysData);
   const [openDays, setOpenDays] = useState<string[]>([]);
+  const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
   const isLoading =
     submitDevotionals.isPending ||
     saveDraft.isPending ||
@@ -59,15 +69,17 @@ export default function PlanDaysPage() {
     devotionalDays.isLoading;
 
   function toggleDay(id: string) {
-    setOpenDays((prev) => (prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]));
+    setOpenDays((prev) =>
+      prev.includes(id) ? prev.filter((dayId) => dayId !== id) : [...prev, id],
+    );
   }
 
   function updateDay(index: number, updates: Partial<Day>) {
-    setDays((prev) => prev.map((d, i) => (i === index ? { ...d, ...updates } : d)));
+    setDays((prev) => prev.map((day, i) => (i === index ? { ...day, ...updates } : day)));
   }
 
-  function normalizeDays(days: Day[]): Day[] {
-    return days.map((d, i) => ({ ...d, day_number: i + 1 }));
+  function normalizeDays(nextDays: Day[]): Day[] {
+    return nextDays.map((day, index) => ({ ...day, day_number: index + 1 }));
   }
 
   function removeDay(index: number) {
@@ -75,21 +87,29 @@ export default function PlanDaysPage() {
   }
 
   async function submitDays() {
+    setSubmissionError(null);
+
     const payload = normalizeDays(
       days
-        .map((d) => ({
-          day_number: d.day_number,
-          content: d.content.trim(),
-          scriptures: d.scriptures,
-          id: d.id,
-          title: d.title.trim(),
+        .map((day) => ({
+          day_number: day.day_number,
+          content: day.content.trim(),
+          scriptures: day.scriptures,
+          id: day.id,
+          title: day.title.trim(),
         }))
-        .filter((d) => d.content),
+        .filter((day) => day.content),
     );
 
-    console.log(payload);
     if (!payload.length) {
-      alert('Atleast 1 day is required!');
+      alert('At least 1 day is required!');
+      return;
+    }
+
+    if (!hasAcceptedContentStandards) {
+      setSubmissionError(
+        'You must confirm your content complies with the Terms of Service and Statement of Faith before publishing.',
+      );
       return;
     }
 
@@ -102,7 +122,7 @@ export default function PlanDaysPage() {
 
     submitDevotionals.mutate(payload, {
       onSuccess: () => {
-        alert('Plan submitted 🎉');
+        alert('Plan submitted!');
         router.push('/plans/my');
       },
       onError: (error) => {
@@ -111,24 +131,28 @@ export default function PlanDaysPage() {
       },
     });
   }
+
   useEffect(() => {
     if (draftsQuery.isLoading || initializedRef.current) return;
+
     if (!drafts?.length) {
       if (planQuery.data?.status === 'published') {
         setDays(
-          (devotionalDays.data || []).map((d) => ({
-            id: d.day_id,
-            day_number: d.day_number,
-            content: d.content,
-            scriptures: d.scriptures ?? [],
-            title: d.title,
+          (devotionalDays.data || []).map((day) => ({
+            id: day.day_id,
+            day_number: day.day_number,
+            content: day.content,
+            scriptures: day.scriptures ?? [],
+            title: day.title,
           })),
         );
+
         if (devotionalDays.data) {
           initializedRef.current = true;
         }
         return;
       }
+
       setDays(daysData);
       if (daysData.length) {
         initializedRef.current = true;
@@ -137,19 +161,20 @@ export default function PlanDaysPage() {
     }
 
     setDays(
-      drafts.map((d) => ({
-        id: d.day_id,
-        day_number: d.day_number,
-        content: d.content,
-        scriptures: d.scriptures ?? [],
-        title: d.title,
+      drafts.map((day) => ({
+        id: day.day_id,
+        day_number: day.day_number,
+        content: day.content,
+        scriptures: day.scriptures ?? [],
+        title: day.title,
       })),
     );
     initializedRef.current = true;
-  }, [drafts, draftsQuery.isLoading, planQuery.data, daysData, devotionalDays.data]);
+  }, [daysData, devotionalDays.data, drafts, draftsQuery.isLoading, planQuery.data]);
+
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -157,15 +182,16 @@ export default function PlanDaysPage() {
 
   if (!planQuery.data && !planQuery.isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center px-4">
-        <p className="text-2xl">Couldn`&apos;`t Load This Plan!</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-800">
+        <p className="text-2xl">Couldn&apos;t load this plan.</p>
       </div>
     );
   }
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8 px-6 py-10">
       <div className="text-center">
-        <div className="flex flex-row items-center justify-center gap-2 mb-4">
+        <div className="mb-4 flex flex-row items-center justify-center gap-2">
           {planQuery.data?.cover_image && (
             <Image
               src={planQuery.data.cover_image}
@@ -176,14 +202,15 @@ export default function PlanDaysPage() {
             />
           )}
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
-            {planQuery?.data ? planQuery?.data.title : 'Write Your Devotional'}{' '}
+            {planQuery.data ? planQuery.data.title : 'Write Your Devotional'}
           </h1>
         </div>
 
-        <p className="text-gray-500 mt-2 dark:text-gray-300">
+        <p className="mt-2 text-gray-500 dark:text-gray-300">
           Add content and scripture for each day
         </p>
       </div>
+
       {planQuery.isLoading || draftsQuery.isLoading || devotionalDays.isLoading ? (
         <div className="flex items-center justify-center">
           <Spinner size="lg" />
@@ -195,14 +222,14 @@ export default function PlanDaysPage() {
             if (!over || active.id === over.id) return;
 
             setDays((prev) => {
-              const oldIndex = prev.findIndex((d) => d.id === active.id);
-              const newIndex = prev.findIndex((d) => d.id === over.id);
+              const oldIndex = prev.findIndex((day) => day.id === active.id);
+              const newIndex = prev.findIndex((day) => day.id === over.id);
               return normalizeDays(arrayMove(prev, oldIndex, newIndex));
             });
           }}>
-          <SortableContext items={days.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={days.map((day) => day.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-4">
-              {days.map((day, i) => (
+              {days.map((day, index) => (
                 <SortableAccordionDay
                   key={day.id}
                   day={day}
@@ -210,15 +237,14 @@ export default function PlanDaysPage() {
                   onToggle={() => toggleDay(day.id)}
                   daysLength={days.length}
                   removeDay={removeDay}
-                  currentIndex={i}>
+                  currentIndex={index}>
                   <input
                     type="text"
                     placeholder="Day title (optional)"
                     value={day.title}
                     maxLength={DAY_TITLE_MAX}
-                    onChange={(e) => updateDay(i, { title: e.target.value })}
-                    className="w-full rounded-lg border px-4 py-2 text-sm
-             focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onChange={(e) => updateDay(index, { title: e.target.value })}
+                    className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <p className="text-xs text-gray-500">
                     {day.title.length}/{DAY_TITLE_MAX}
@@ -226,12 +252,12 @@ export default function PlanDaysPage() {
 
                   <RichTextEditor
                     value={day.content}
-                    onChange={(html) => updateDay(i, { content: html })}
+                    onChange={(html) => updateDay(index, { content: html })}
                   />
 
                   <ScriptureSelector
                     value={day.scriptures}
-                    onChange={(refs) => updateDay(i, { scriptures: refs })}
+                    onChange={(refs) => updateDay(index, { scriptures: refs })}
                   />
                 </SortableAccordionDay>
               ))}
@@ -239,6 +265,44 @@ export default function PlanDaysPage() {
           </SortableContext>
         </DndContext>
       )}
+
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+        <p className="font-semibold">Before you publish</p>
+        <p className="mt-2 leading-6">
+          ThingsAbove strictly enforces the rule that submitted content may not violate historical
+          Christian principles. Review the{' '}
+          <Link href="/terms" className="underline underline-offset-4">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="/statement-of-faith" className="underline underline-offset-4">
+            Statement of Faith
+          </Link>{' '}
+          before making this plan public.
+        </p>
+        <div className="mt-4 flex items-start gap-3">
+          <Checkbox
+            id="content-standards-acknowledgement"
+            checked={hasAcceptedContentStandards}
+            onCheckedChange={(checked) => {
+              const isChecked = checked === true;
+              setHasAcceptedContentStandards(isChecked);
+              if (isChecked) {
+                setSubmissionError(null);
+              }
+            }}
+            className="mt-1"
+          />
+          <label htmlFor="content-standards-acknowledgement" className="leading-6 text-amber-950">
+            I confirm that this plan and all submitted devotional content do not violate historical
+            Christian principles, the ThingsAbove Terms of Service, or the ThingsAbove Statement of
+            Faith. I understand this standard is strictly enforced.
+          </label>
+        </div>
+        {submissionError && (
+          <p className="mt-3 text-sm font-medium text-red-600">{submissionError}</p>
+        )}
+      </div>
 
       <div className="flex justify-between pt-6">
         <button
@@ -254,29 +318,30 @@ export default function PlanDaysPage() {
               },
             ])
           }
-          className="px-6 py-3 rounded-full border">
+          className="rounded-full border px-6 py-3">
           + Add Day
         </button>
 
         <button
           onClick={submitDays}
           disabled={isLoading}
-          className="px-8 py-3 rounded-full bg-indigo-600 text-white">
+          className="rounded-full bg-indigo-600 px-8 py-3 text-white">
           {submitDevotionals.isPending ? 'Publishing...' : 'Publish'}
         </button>
+
         <button
           onClick={() =>
             saveDraft.mutate(normalizeDays(days), {
               onSuccess: () => {
-                alert('Draft saved 💾');
+                alert('Draft saved.');
               },
-              onError: (e) => {
-                console.log(e);
+              onError: (error) => {
+                console.log(error);
               },
             })
           }
           disabled={isLoading}
-          className="px-6 py-3 rounded-full border border-gray-300">
+          className="rounded-full border border-gray-300 px-6 py-3">
           {saveDraft.isPending ? 'Saving Draft...' : 'Save Draft'}
         </button>
       </div>
@@ -309,12 +374,14 @@ function SortableAccordionDay({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
   function getContentPreview(html: string, maxLength = 100) {
     if (!html) return '';
     const text = html.replace(/<[^>]+>/g, '').trim();
     if (!text) return '';
-    return text.length > maxLength ? text.slice(0, maxLength) + '…' : text;
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   }
+
   const handleDeleteDay = () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "Day ${day.day_number}"?\nThis action cannot be undone.`,
@@ -324,11 +391,11 @@ function SortableAccordionDay({
 
     removeDay(currentIndex);
   };
+
   return (
-    <div ref={setNodeRef} style={style} className="border rounded-xl">
-      {/* Header */}
+    <div ref={setNodeRef} style={style} className="rounded-xl border">
       <div
-        className="flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-gray-700 cursor-pointer rounded-xl"
+        className="flex cursor-pointer items-center justify-between rounded-xl bg-gray-100 px-4 py-3 dark:bg-gray-700"
         onClick={onToggle}>
         <div className="flex items-center gap-3">
           <span
@@ -338,21 +405,23 @@ function SortableAccordionDay({
             className="cursor-grab text-gray-400">
             <Menu />
           </span>
-          <h3 className="font-semibold flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold">
             <span>Day {day.day_number}</span>
 
             {day.title && (
-              <span className="text-lg font-bold text-gray-500 dark:text-gray-200 truncate max-w-[220px]">
-                — {day.title}
+              <span className="max-w-[220px] truncate text-lg font-bold text-gray-500 dark:text-gray-200">
+                - {day.title}
               </span>
             )}
+
             {!isOpen && day.content && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-200 line-clamp-1 truncate max-w-[420px]">
+              <p className="mt-1 line-clamp-1 max-w-[420px] truncate text-sm text-gray-500 dark:text-gray-200">
                 :- {getContentPreview(day.content)}
               </p>
             )}
           </h3>
         </div>
+
         <div className="flex gap-2">
           {daysLength > 1 && (
             <button
@@ -368,9 +437,8 @@ function SortableAccordionDay({
         </div>
       </div>
 
-      {/* Content */}
       {isOpen && (
-        <div className="p-6 space-y-6 bg-white dark:bg-gray-800 rounded-b-xl">{children}</div>
+        <div className="space-y-6 rounded-b-xl bg-white p-6 dark:bg-gray-800">{children}</div>
       )}
     </div>
   );
