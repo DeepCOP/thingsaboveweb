@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "life.thingsabove",
+      "sha256_cert_fingerprints": [
+        "C7:47:A1:2E:F9:A7:CE:E1:F6:52:72:C9:25:76:D6:24:D3:74:B1:3D:14:23:A2:85:59:49:90:FA:D6:13:88:A2"
+      ]
+    }
+  }
+]
