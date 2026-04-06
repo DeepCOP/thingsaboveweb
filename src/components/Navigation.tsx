@@ -90,11 +90,18 @@ export default function Navigation() {
               )}
             </button>
             {isGuest && (
-              <button
-                onClick={() => router.push('/auth/sign-up')}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors">
-                Get Started
-              </button>
+              <>
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
+                  Login
+                </button>
+                <button
+                  onClick={() => router.push('/auth/sign-up')}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  Get Started
+                </button>
+              </>
             )}
             {!isGuest && (
               <>
