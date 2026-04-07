@@ -38,7 +38,7 @@ const sections = [
     ],
     bullets: [
       'Submitted content may not materially conflict with the ThingsAbove Statement of Faith or historic Christian orthodoxy.',
-      'Submitted content may not be blasphemous, hateful, sexually explicit, exploitative, deceptive, or unlawful.',
+      'Submitted content may not be blasphemous, hateful, sexually explicit, exploitative or deceptive.',
       'Submitted content may not use scripture, prayer, or Christian teaching as a pretext for manipulation, harassment, or abuse.',
       'You may not upload content you do not have the right to use.',
     ],
