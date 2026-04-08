@@ -423,7 +423,7 @@ function SortableAccordionDay({
             <Menu />
           </span>
           <h3 className="flex items-center gap-2 font-semibold">
-            <span>Day {day.day_number}</span>
+            <span className="whitespace-nowrap">Day {day.day_number}</span>
 
             {day.title && (
               <span className="max-w-[220px] truncate text-lg font-bold text-gray-500 dark:text-gray-200">
