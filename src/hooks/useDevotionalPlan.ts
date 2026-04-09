@@ -3,7 +3,7 @@ import {
   getDevotionalById,
   getMyDevotionalPlans,
   getPlansReports,
-  fetchDevotionalPlanAllowedTags,
+  fetchPlanTags,
 } from '../api/queries';
 import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
@@ -21,8 +21,8 @@ export function useGetDevotionalById(id: string, userId: string | undefined) {
 export const useDevotionalPlanAllowedTags = () => {
   return useQuery({
     queryKey: ['devotional_plan_allowed_tags'],
-    staleTime: 1000 * 60 * 60 * 24,
-    queryFn: async () => fetchDevotionalPlanAllowedTags(),
+    staleTime: 1000 * 60 * 60 * 24 * 30, // 30 days
+    queryFn: async () => fetchPlanTags(),
   });
 };
 

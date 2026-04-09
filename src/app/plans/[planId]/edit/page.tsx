@@ -160,7 +160,9 @@ export default function EditPlanPage() {
                 );
               })}
             </div>
-            <p className="text-sm text-gray-500 mt-2">Pick all that apply.</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Choose a few tags that best describe your plan.
+            </p>
           </>
         )}
       </div>
