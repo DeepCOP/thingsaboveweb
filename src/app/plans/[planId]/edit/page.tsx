@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/src/state/AuthContext';
-import { useGetDevotionalById, useUpdateDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
+import {
+  useDevotionalPlanAllowedTags,
+  useGetDevotionalById,
+  useUpdateDevotionalPlan,
+} from '@/src/hooks/useDevotionalPlan';
 import { uploadPlanCover } from '@/src/lib/utils';
 import Spinner from '@/src/components/ui/Spinner';
 import Image from 'next/image';
@@ -14,6 +18,11 @@ export default function EditPlanPage() {
   const router = useRouter();
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
   const updatePlan = useUpdateDevotionalPlan();
+  const {
+    data: availableTags = [],
+    isLoading: isLoadingAllowedTags,
+    isError: hasAllowedTagsError,
+  } = useDevotionalPlanAllowedTags();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -24,19 +33,6 @@ export default function EditPlanPage() {
 
   const TITLE_MAX = 120;
   const DESCRIPTION_MAX = 500;
-
-  const availableTags = [
-    'Prayer',
-    'Faith',
-    'Hope',
-    'Healing',
-    'Gratitude',
-    'Peace',
-    'Wisdom',
-    'Discipleship',
-    'Family',
-    'Leadership',
-  ];
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -140,25 +136,33 @@ export default function EditPlanPage() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-        <div className="flex flex-wrap gap-2">
-          {availableTags.map((tag) => {
-            const isSelected = selectedTags.includes(tag);
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                className={`rounded-full border px-3 py-1 text-sm transition ${
-                  isSelected
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
-                }`}>
-                {tag}
-              </button>
-            );
-          })}
-        </div>
-        <p className="text-sm text-gray-500 mt-2">Pick all that apply.</p>
+        {isLoadingAllowedTags ? (
+          <p className="text-sm text-gray-500">Loading tags...</p>
+        ) : hasAllowedTagsError ? (
+          <p className="text-sm text-red-600">Unable to load tags right now.</p>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`rounded-full border px-3 py-1 text-sm transition ${
+                      isSelected
+                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                    }`}>
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-sm text-gray-500 mt-2">Pick all that apply.</p>
+          </>
+        )}
       </div>
       <div>
         {preview && (
