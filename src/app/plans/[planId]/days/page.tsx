@@ -12,7 +12,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChevronDown, ChevronUp, Menu, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, Menu, Trash2 } from 'lucide-react';
 
 import ScriptureSelector from '@/src/components/ScriptureSelector';
 import RichTextEditor from '@/src/components/editor/RichTextEditor';
@@ -31,6 +31,16 @@ type Day = {
   title: string;
 };
 
+function createEmptyDay(dayNumber: number): Day {
+  return {
+    day_number: dayNumber,
+    content: '',
+    scriptures: [],
+    id: crypto.randomUUID(),
+    title: '',
+  };
+}
+
 export default function PlanDaysPage() {
   const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
@@ -47,13 +57,7 @@ export default function PlanDaysPage() {
   const daysData = useMemo(() => {
     if (!planQuery.data) return [];
 
-    return [...Array(planQuery.data.total_days)].map((_, idx) => ({
-      day_number: idx + 1,
-      content: '',
-      scriptures: [],
-      id: crypto.randomUUID(),
-      title: '',
-    }));
+    return [...Array(planQuery.data.total_days)].map((_, idx) => createEmptyDay(idx + 1));
   }, [planQuery.data]);
 
   const [days, setDays] = useState<Day[]>(daysData);
@@ -83,7 +87,26 @@ export default function PlanDaysPage() {
   }
 
   function removeDay(index: number) {
+    const dayId = days[index]?.id;
     setDays((prev) => normalizeDays(prev.filter((_, i) => i !== index)));
+    if (dayId) {
+      setOpenDays((prev) => prev.filter((openDayId) => openDayId !== dayId));
+    }
+  }
+
+  function duplicateDay(index: number) {
+    const sourceDay = days[index];
+    if (!sourceDay) return;
+
+    const duplicatedDay: Day = {
+      ...sourceDay,
+      id: crypto.randomUUID(),
+      scriptures: [...sourceDay.scriptures],
+    };
+
+    setDays((prev) =>
+      normalizeDays([...prev.slice(0, index + 1), duplicatedDay, ...prev.slice(index + 1)]),
+    );
   }
 
   async function submitDays() {
@@ -237,6 +260,7 @@ export default function PlanDaysPage() {
                   onToggle={() => toggleDay(day.id)}
                   daysLength={days.length}
                   removeDay={removeDay}
+                  duplicateDay={duplicateDay}
                   currentIndex={index}>
                   <input
                     type="text"
@@ -306,18 +330,7 @@ export default function PlanDaysPage() {
 
       <div className="flex justify-between pt-6">
         <button
-          onClick={() =>
-            setDays((prev) => [
-              ...prev,
-              {
-                day_number: prev.length + 1,
-                content: '',
-                scriptures: [],
-                id: crypto.randomUUID(),
-                title: '',
-              },
-            ])
-          }
+          onClick={() => setDays((prev) => [...prev, createEmptyDay(prev.length + 1)])}
           className="rounded-full border px-6 py-3">
           + Add Day
         </button>
@@ -357,6 +370,7 @@ function SortableAccordionDay({
   daysLength,
   currentIndex,
   removeDay,
+  duplicateDay,
 }: {
   day: { id: string; day_number: number; content: string; scriptures: string[]; title: string };
   isOpen: boolean;
@@ -365,6 +379,7 @@ function SortableAccordionDay({
   daysLength: number;
   currentIndex: number;
   removeDay: (index: number) => void;
+  duplicateDay: (index: number) => void;
 }) {
   const { setNodeRef, attributes, listeners, transform, transition } = useSortable({
     id: day.id,
@@ -406,7 +421,7 @@ function SortableAccordionDay({
             <Menu />
           </span>
           <h3 className="flex items-center gap-2 font-semibold">
-            <span>Day {day.day_number}</span>
+            <span className="whitespace-nowrap">Day {day.day_number}</span>
 
             {day.title && (
               <span className="max-w-[220px] truncate text-lg font-bold text-gray-500 dark:text-gray-200">
@@ -423,12 +438,28 @@ function SortableAccordionDay({
         </div>
 
         <div className="flex gap-2">
+          {isOpen && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateDay(currentIndex);
+              }}
+              aria-label={`Duplicate Day ${day.day_number}`}
+              title="Duplicate day"
+              className="text-sm text-gray-500 transition hover:text-gray-700">
+              <Copy />
+            </button>
+          )}
           {daysLength > 1 && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteDay();
               }}
+              aria-label={`Delete Day ${day.day_number}`}
+              title="Delete day"
               className="text-sm text-red-500 hover:underline">
               <Trash2 />
             </button>
