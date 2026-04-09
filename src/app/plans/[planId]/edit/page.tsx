@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/src/state/AuthContext';
 import {
-  useDevotionalPlanAllowedTags,
+  usePlanTags,
   useGetDevotionalById,
   useUpdateDevotionalPlan,
 } from '@/src/hooks/useDevotionalPlan';
@@ -20,9 +20,9 @@ export default function EditPlanPage() {
   const updatePlan = useUpdateDevotionalPlan();
   const {
     data: availableTags = [],
-    isLoading: isLoadingAllowedTags,
-    isError: hasAllowedTagsError,
-  } = useDevotionalPlanAllowedTags();
+    isLoading: isPlanTags,
+    isError: hasPlanTagsError,
+  } = usePlanTags();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -136,9 +136,9 @@ export default function EditPlanPage() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-        {isLoadingAllowedTags ? (
+        {isPlanTags ? (
           <p className="text-sm text-gray-500">Loading tags...</p>
-        ) : hasAllowedTagsError ? (
+        ) : hasPlanTagsError ? (
           <p className="text-sm text-red-600">Unable to load tags right now.</p>
         ) : (
           <>

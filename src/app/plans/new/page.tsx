@@ -5,10 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import {
-  useCreateDevotionalPlan,
-  useDevotionalPlanAllowedTags,
-} from '@/src/hooks/useDevotionalPlan';
+import { useCreateDevotionalPlan, usePlanTags } from '@/src/hooks/useDevotionalPlan';
 import { uploadPlanCover } from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
 
@@ -25,9 +22,9 @@ export default function CreatePlanPage() {
   const createPlanMutation = useCreateDevotionalPlan();
   const {
     data: availableTags = [],
-    isLoading: isLoadingAllowedTags,
-    isError: hasAllowedTagsError,
-  } = useDevotionalPlanAllowedTags();
+    isLoading: isLoadingPlanTags,
+    isError: hasPlanTagsError,
+  } = usePlanTags();
 
   const TITLE_MAX = 120;
   const DESCRIPTION_MAX = 500;
@@ -164,9 +161,9 @@ export default function CreatePlanPage() {
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Tags
           </label>
-          {isLoadingAllowedTags ? (
+          {isLoadingPlanTags ? (
             <p className="text-sm text-gray-500 dark:text-gray-300">Loading tags...</p>
-          ) : hasAllowedTagsError ? (
+          ) : hasPlanTagsError ? (
             <p className="text-sm text-red-600 dark:text-red-400">Unable to load tags right now.</p>
           ) : (
             <>

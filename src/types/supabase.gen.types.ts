@@ -1333,7 +1333,7 @@ export type Database = {
         Args: { p_requester_id: string };
         Returns: undefined;
       };
-      devotional_plan_allowed_tags: { Args: never; Returns: string[] };
+      plan_tags: { Args: never; Returns: string[] };
       ensure_day_items_exist: {
         Args: {
           p_day_id: string;

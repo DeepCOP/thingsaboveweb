@@ -18,9 +18,9 @@ export function useGetDevotionalById(id: string, userId: string | undefined) {
   });
 }
 
-export const useDevotionalPlanAllowedTags = () => {
+export const usePlanTags = () => {
   return useQuery({
-    queryKey: ['devotional_plan_allowed_tags'],
+    queryKey: ['plan_tags'],
     staleTime: 1000 * 60 * 60 * 24 * 30, // 30 days
     queryFn: async () => fetchPlanTags(),
   });

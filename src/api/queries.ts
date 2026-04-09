@@ -12,7 +12,7 @@ export async function getDevotionalById(id: string) {
 }
 
 export const fetchPlanTags = async () => {
-  const { data, error } = await supabase.rpc('devotional_plan_allowed_tags');
+  const { data, error } = await supabase.rpc('plan_tags');
 
   if (error) throw error;
 
