@@ -3,6 +3,7 @@ import Hero from '@/src/components/Hero';
 import Features from '@/src/components/Features';
 import HowItWorks from '@/src/components/HowItWorks';
 import Community from '@/src/components/Community';
+import Adoption from '@/src/components/Adoption';
 import CTA from '@/src/components/CTA';
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
       <Features />
       <HowItWorks />
       <Community />
+      <Adoption />
       <CTA />
     </main>
   );
