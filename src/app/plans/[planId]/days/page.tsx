@@ -98,17 +98,15 @@ export default function PlanDaysPage() {
     const sourceDay = days[index];
     if (!sourceDay) return;
 
-    const duplicatedDayId = crypto.randomUUID();
     const duplicatedDay: Day = {
       ...sourceDay,
-      id: duplicatedDayId,
+      id: crypto.randomUUID(),
       scriptures: [...sourceDay.scriptures],
     };
 
     setDays((prev) =>
       normalizeDays([...prev.slice(0, index + 1), duplicatedDay, ...prev.slice(index + 1)]),
     );
-    setOpenDays((prev) => (prev.includes(duplicatedDayId) ? prev : [...prev, duplicatedDayId]));
   }
 
   async function submitDays() {
