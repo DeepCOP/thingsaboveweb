@@ -438,17 +438,19 @@ function SortableAccordionDay({
         </div>
 
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              duplicateDay(currentIndex);
-            }}
-            aria-label={`Duplicate Day ${day.day_number}`}
-            title="Duplicate day"
-            className="text-sm text-gray-500 transition hover:text-gray-700">
-            <Copy />
-          </button>
+          {isOpen && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateDay(currentIndex);
+              }}
+              aria-label={`Duplicate Day ${day.day_number}`}
+              title="Duplicate day"
+              className="text-sm text-gray-500 transition hover:text-gray-700">
+              <Copy />
+            </button>
+          )}
           {daysLength > 1 && (
             <button
               type="button"
