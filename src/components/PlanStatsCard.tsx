@@ -1,18 +1,15 @@
-import { ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
+import { ThumbsUp, Flag } from 'lucide-react';
 
 export default function PlanStatsCard({
-  likes,
-  dislikes,
+  helpfulCount,
   reports,
 }: {
-  likes: number;
-  dislikes: number;
+  helpfulCount: number;
   reports: number;
 }) {
   return (
     <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-      <Stat icon={<ThumbsUp className="w-4 h-4" />} value={likes} />
-      <Stat icon={<ThumbsDown className="w-4 h-4" />} value={dislikes} />
+      <Stat icon={<ThumbsUp className="w-4 h-4" />} value={helpfulCount} />
       <Stat
         icon={<Flag className="w-4 h-4 text-orange-500" />}
         value={reports}

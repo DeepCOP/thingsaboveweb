@@ -1,4 +1,4 @@
-import { Reports } from '@/src/types/types';
+import { GetMyDevotionalPlans, Reports } from '@/src/types/types';
 import PlanStatsCard from './PlanStatsCard';
 import { Edit, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -12,17 +12,7 @@ export default function PlanCard({
   deleting,
   onDelete,
 }: {
-  plan: {
-    cover_image: string;
-    created_at: string;
-    description: string;
-    dislikes_count: number;
-    id: string;
-    likes_count: number;
-    status: string;
-    title: string;
-    total_days: number;
-  };
+  plan: GetMyDevotionalPlans[number];
   onContinue: () => void;
   reports: Reports[];
   deleting: boolean;
@@ -60,11 +50,7 @@ export default function PlanCard({
         <p className="text-sm text-gray-500 line-clamp-2">{plan.description}</p>
 
         {/* ✅ Stats */}
-        <PlanStatsCard
-          likes={plan.likes_count}
-          dislikes={plan.dislikes_count}
-          reports={reports.length}
-        />
+        <PlanStatsCard helpfulCount={plan.helpful_count} reports={reports.length} />
 
         <div className="flex items-center justify-between pt-3">
           <span className="text-sm text-gray-400">{plan.total_days} days</span>
