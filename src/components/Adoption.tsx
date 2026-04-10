@@ -4,65 +4,25 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-
-const stats = [
-  {
-    value: '15',
-    label: 'Beta testers',
-    valueClassName: 'text-slate-950 dark:text-white',
-  },
-  {
-    value: '11',
-    label: 'Active this week',
-    valueClassName: 'text-emerald-600 dark:text-emerald-400',
-  },
-  {
-    value: '5',
-    label: 'Active today',
-    valueClassName: 'text-blue-600 dark:text-blue-400',
-  },
-];
-
-const growthData = [
-  { label: 'Mar 22', value: 1.1 },
-  { label: 'Mar 24', value: 1.8 },
-  { label: 'Mar 27', value: 3.6 },
-  { label: 'Mar 29', value: 4.4 },
-  { label: 'Mar 31', value: 5.3 },
-  { label: 'Apr 2', value: 6.1 },
-  { label: 'Apr 4', value: 7.0 },
-  { label: 'Apr 6', value: 7.8 },
-  { label: 'Apr 7', value: 11.3 },
-];
-
-const axisLabels = ['Mar 22', 'Mar 29', 'Apr 1', 'Apr 7'];
-
-const avatars = [
-  { label: 'J', className: 'bg-[#1aa37a] text-white' },
-  { label: 'M', className: 'bg-[#2466b4] text-white' },
-  { label: 'S', className: 'bg-[#0f766e] text-white' },
-  { label: '+', className: 'bg-[#3b82f6] text-white' },
-];
+import type { AdoptionAvatar, AdoptionGrowthPoint, AdoptionStat } from '@/src/types/adoption';
 
 const CHART_WIDTH = 920;
 const CHART_HEIGHT = 360;
 const CHART_PADDING = { top: 28, right: 34, bottom: 34, left: 22 };
 const CHART_BASELINE = CHART_HEIGHT - CHART_PADDING.bottom;
-const CHART_MAX = 12;
 
-type Point = {
+type Point = AdoptionGrowthPoint & {
   x: number;
   y: number;
 };
 
-const points = growthData.map((item, index) => {
-  const usableWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
-  const usableHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
-  const x = CHART_PADDING.left + (usableWidth * index) / (growthData.length - 1);
-  const y = CHART_PADDING.top + usableHeight * (1 - item.value / CHART_MAX);
-
-  return { ...item, x, y };
-});
+type AdoptionProps = {
+  stats: AdoptionStat[];
+  growthData: AdoptionGrowthPoint[];
+  axisLabels: string[];
+  chartRangeLabel: string;
+  avatars: AdoptionAvatar[];
+};
 
 function buildSmoothPath(chartPoints: Point[]) {
   if (chartPoints.length === 0) return '';
@@ -79,10 +39,13 @@ function buildSmoothPath(chartPoints: Point[]) {
   }, '');
 }
 
-const linePath = buildSmoothPath(points);
-const areaPath = `${linePath} L ${points[points.length - 1].x} ${CHART_BASELINE} L ${points[0].x} ${CHART_BASELINE} Z`;
-
-export default function Adoption() {
+export default function Adoption({
+  stats,
+  growthData,
+  axisLabels,
+  chartRangeLabel,
+  avatars,
+}: AdoptionProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
@@ -104,6 +67,29 @@ export default function Adoption() {
 
     return () => observer.disconnect();
   }, []);
+
+  const safeGrowthData =
+    growthData.length > 0
+      ? growthData
+      : Array.from({ length: 9 }, (_, index) => ({
+          label: `${index + 1}`,
+          value: 0,
+        }));
+
+  const maxValue = Math.max(...safeGrowthData.map((item) => item.value), 1);
+  const usableWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
+  const usableHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
+  const points = safeGrowthData.map((item, index) => {
+    const denominator = Math.max(safeGrowthData.length - 1, 1);
+    const x = CHART_PADDING.left + (usableWidth * index) / denominator;
+    const y = CHART_PADDING.top + usableHeight * (1 - item.value / maxValue);
+
+    return { ...item, x, y };
+  });
+  const linePath = buildSmoothPath(points);
+  const areaPath = points.length
+    ? `${linePath} L ${points[points.length - 1].x} ${CHART_BASELINE} L ${points[0].x} ${CHART_BASELINE} Z`
+    : '';
 
   return (
     <section
@@ -157,7 +143,7 @@ export default function Adoption() {
           transition={{ duration: 0.65, delay: 0.2 }}
           className="overflow-hidden rounded-[32px] border border-emerald-200/80 bg-white/90 p-5 shadow-[0_26px_70px_-40px_rgba(15,23,42,0.18)] backdrop-blur dark:border-emerald-900/70 dark:bg-white/5 dark:shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)] sm:p-8">
           <div className="text-lg text-slate-400 dark:text-slate-500 sm:text-[1.15rem]">
-            Beta tester growth | Mar - Apr 2026
+            Beta tester growth | {chartRangeLabel}
           </div>
 
           <div className="mt-6 h-[18rem] sm:h-[25rem]">
@@ -165,7 +151,7 @@ export default function Adoption() {
               viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
               className="h-full w-full"
               role="img"
-              aria-label="Beta tester growth chart from March to April 2026">
+              aria-label={`Beta tester growth chart for ${chartRangeLabel}`}>
               <defs>
                 <linearGradient id="adoption-area-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="rgba(26, 163, 122, 0.18)" />
@@ -208,7 +194,7 @@ export default function Adoption() {
 
               {points.map((point, index) => (
                 <motion.g
-                  key={point.label}
+                  key={`${point.label}-${index}`}
                   initial={{ opacity: 0, scale: 0.3 }}
                   animate={inView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.35, delay: 0.45 + index * 0.07 }}>
@@ -226,18 +212,9 @@ export default function Adoption() {
             </svg>
           </div>
 
-          <div className="mt-3 flex items-start justify-between gap-4 px-2 text-xl tracking-tight text-slate-400 dark:text-slate-500 sm:text-[1.15rem]">
-            {axisLabels.map((label, index) => (
-              <div key={label} className={index === 2 ? 'text-center' : ''}>
-                {index === 2 ? (
-                  <>
-                    <span className="block">Apr</span>
-                    <span className="block">1</span>
-                  </>
-                ) : (
-                  label
-                )}
-              </div>
+          <div className="mt-3 flex items-start justify-between gap-4 px-2 text-sm tracking-tight text-slate-400 dark:text-slate-500 sm:text-[1.15rem]">
+            {axisLabels.map((label) => (
+              <div key={label}>{label}</div>
             ))}
           </div>
         </motion.div>
@@ -247,15 +224,17 @@ export default function Adoption() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.36 }}
           className="flex flex-col items-center justify-center gap-6 text-center sm:flex-row sm:text-left">
-          <div className="flex -space-x-3">
-            {avatars.map((avatar) => (
-              <div
-                key={avatar.label}
-                className={`flex h-14 w-14 items-center justify-center rounded-full border-4 border-white text-xl font-semibold shadow-sm dark:border-[#0a211d] ${avatar.className}`}>
-                {avatar.label}
-              </div>
-            ))}
-          </div>
+          {avatars.length > 0 && (
+            <div className="flex -space-x-3">
+              {avatars.map((avatar) => (
+                <div
+                  key={`${avatar.className}-${avatar.label}`}
+                  className={`flex h-14 w-14 items-center justify-center rounded-full border-4 border-white font-semibold shadow-sm dark:border-[#0a211d] ${avatar.className} ${avatar.compact ? 'text-sm' : 'text-xl'}`}>
+                  {avatar.label}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
             <p className="text-2xl text-slate-600 dark:text-slate-300">
