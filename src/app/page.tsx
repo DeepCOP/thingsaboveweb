@@ -1,21 +1,22 @@
+import { Suspense } from 'react';
 import Hero from '@/src/components/Hero';
 import Features from '@/src/components/Features';
 import HowItWorks from '@/src/components/HowItWorks';
 import Community from '@/src/components/Community';
-import Adoption from '@/src/components/Adoption';
+import AdoptionSection from '@/src/components/AdoptionSection';
+import AdoptionSkeleton from '@/src/components/AdoptionSkeleton';
 import CTA from '@/src/components/CTA';
-import { getAdoptionMetrics } from '@/src/lib/adoption';
 
-export default async function Home() {
-  const adoptionMetrics = await getAdoptionMetrics();
-
+export default function Home() {
   return (
     <main className="min-h-screen">
       <Hero />
       <Features />
       <HowItWorks />
       <Community />
-      <Adoption {...adoptionMetrics} />
+      <Suspense fallback={<AdoptionSkeleton />}>
+        <AdoptionSection />
+      </Suspense>
       <CTA />
     </main>
   );
