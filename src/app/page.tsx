@@ -1,8 +1,10 @@
-import Navigation from '@/src/components/Navigation';
+import { Suspense } from 'react';
 import Hero from '@/src/components/Hero';
 import Features from '@/src/components/Features';
 import HowItWorks from '@/src/components/HowItWorks';
 import Community from '@/src/components/Community';
+import AdoptionSection from '@/src/components/AdoptionSection';
+import AdoptionSkeleton from '@/src/components/AdoptionSkeleton';
 import CTA from '@/src/components/CTA';
 
 export default function Home() {
@@ -12,6 +14,9 @@ export default function Home() {
       <Features />
       <HowItWorks />
       <Community />
+      <Suspense fallback={<AdoptionSkeleton />}>
+        <AdoptionSection />
+      </Suspense>
       <CTA />
     </main>
   );
