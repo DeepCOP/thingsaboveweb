@@ -52,6 +52,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/terms/') ||
     pathname === '/statement-of-faith' ||
     pathname.startsWith('/statement-of-faith/') ||
+    pathname.startsWith('/.well-known') ||
     pathname.startsWith('/auth');
 
   if (!isPublicRoute && !user && !pathname.startsWith('/login')) {
