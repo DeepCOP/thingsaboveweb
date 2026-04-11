@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getDevotionalById, getMyDevotionalPlans, getPlansReports } from '../api/queries';
+import {
+  getDevotionalById,
+  getMyDevotionalPlans,
+  getPlansReports,
+  fetchPlanTags,
+} from '../api/queries';
 import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
 import { DevotionalDayInput } from '@/src/types/types';
@@ -12,6 +17,14 @@ export function useGetDevotionalById(id: string, userId: string | undefined) {
     queryFn: async () => getDevotionalById(id),
   });
 }
+
+export const usePlanTags = () => {
+  return useQuery({
+    queryKey: ['plan_tags'],
+    staleTime: 1000 * 60 * 60 * 24 * 30, // 30 days
+    queryFn: async () => fetchPlanTags(),
+  });
+};
 
 export function useMyDevotionalPlans(user_id: string | undefined) {
   return useQuery({
