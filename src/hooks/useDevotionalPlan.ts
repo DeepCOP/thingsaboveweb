@@ -47,8 +47,11 @@ export function useUpdateDevotionalPlan() {
 
   return useMutation({
     mutationFn: async (input: DevotionalPlanUpdate) => updateDevotionalPlan(input),
-    onSuccess: () => {
+    onSuccess: (_, input) => {
       qc.invalidateQueries({ queryKey: ['my-devotional-plans'] });
+      if (input.id) {
+        qc.invalidateQueries({ queryKey: ['devotional-plan', input.id] });
+      }
     },
   });
 }
@@ -67,8 +70,11 @@ export function useDeleteDevotionalPlan() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (planId: string) => deleteDevotionalPlan(planId),
-    onSuccess: () => {
+    onSuccess: (_, planId) => {
       qc.invalidateQueries({ queryKey: ['my-devotional-plans'] });
+      qc.invalidateQueries({ queryKey: ['devotional-plan', planId] });
+      qc.invalidateQueries({ queryKey: ['devotional-drafts', planId] });
+      qc.invalidateQueries({ queryKey: ['devotional-days', planId] });
     },
   });
 }
