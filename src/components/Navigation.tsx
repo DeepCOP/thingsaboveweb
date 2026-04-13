@@ -25,7 +25,7 @@ export default function Navigation() {
   }, []);
 
   const navigateToSection = (id: string) => {
-    // If we're already on the homepage → smooth scroll
+    // If we're already on the homepage, smooth scroll.
     if (pathname === '/') {
       const el = document.getElementById(id);
       if (el) {
@@ -34,7 +34,7 @@ export default function Navigation() {
       return;
     }
 
-    // Otherwise → navigate to homepage with hash
+    // Otherwise, navigate to the homepage with the section hash.
     router.push(`/#${id}`);
   };
 
@@ -75,6 +75,11 @@ export default function Navigation() {
               onClick={() => navigateToSection('community')}
               className="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
               Community
+            </button>
+            <button
+              onClick={() => navigateToSection('download')}
+              className="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
+              Download
             </button>
           </div>
 

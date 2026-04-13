@@ -7,6 +7,13 @@ import { useEffect, useState } from 'react';
 export default function CTA() {
   const [inView, setInView] = useState(false);
 
+  const scrollToDownload = () => {
+    const element = document.getElementById('download');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -53,13 +60,15 @@ export default function CTA() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-white hover:bg-neutral-50 text-emerald-600 text-lg font-semibold rounded-xl shadow-2xl transition-all flex items-center space-x-2 group">
-              <span>Get Started Free</span>
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </motion.button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="group">
+              <button
+                type="button"
+                onClick={scrollToDownload}
+                className="flex items-center space-x-2 rounded-xl bg-white px-8 py-4 text-lg font-semibold text-emerald-600 shadow-2xl transition-all hover:bg-neutral-50">
+                <span>Download the Beta</span>
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </button>
+            </motion.div>
           </div>
         </motion.div>
       </div>
