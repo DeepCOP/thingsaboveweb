@@ -64,7 +64,7 @@ export default function Hero() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => scrollToSection('cta')}
+              onClick={() => scrollToSection('download')}
               className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center space-x-2">
               <BookOpen className="h-5 w-5" />
               <span>Start Reading</span>
