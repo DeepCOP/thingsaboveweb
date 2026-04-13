@@ -56,6 +56,14 @@ export default function Hero() {
             friends through guided Bible reading plans.
           </motion.p>
 
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.45 }}
+            className="max-w-2xl mx-auto text-base sm:text-lg text-neutral-700 dark:text-neutral-200 leading-relaxed italic">
+            &ldquo;Draw near to God, and He will draw near to you.&rdquo; James 4:8
+          </motion.p>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
