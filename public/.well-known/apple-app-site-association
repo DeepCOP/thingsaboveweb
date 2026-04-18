@@ -6,7 +6,6 @@
         "appID": "68QL934TUR.life.thingsabove",
         "paths": [
           "/church/*",
-          "/auth/*",
           "/devotional_detail/*",
           "/plan_progress/*",
           "/bible/*"
