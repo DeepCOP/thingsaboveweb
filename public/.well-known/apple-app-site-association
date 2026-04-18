@@ -5,11 +5,25 @@
       {
         "appID": "68QL934TUR.life.thingsabove",
         "paths": [
+          "/PlansTab",
+          "/CommunityTab",
+          "/BibleTab",
+          "/ProfileTab",
+          "/signin",
+          "/signup",
+          "/about-details",
+          "/confirm-email",
+          "/settings",
+          "/notifications",
+          "/add_friend",
+          "/accept_friend",
+          "/scripture_notes",
+          "/search/devotionals",
           "/church/*",
-          "/auth/*",
           "/devotional_detail/*",
           "/plan_progress/*",
-          "/bible/*"
+          "/bible/*",
+          "/prayer/*"
         ]
       }
     ]
