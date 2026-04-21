@@ -102,7 +102,8 @@ export default function CreatePlanPage() {
             Create Devotional Plan
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-200">
-            Start by giving your devotional a title and short introduction.
+            Start with the basics here. You&apos;ll add each day next, then submit the finished
+            draft for screening. If it passes, it will publish automatically.
           </p>
         </div>
 
@@ -241,7 +242,7 @@ export default function CreatePlanPage() {
             }}
           />
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            You&apos;ll add the content for each day next.
+            You&apos;ll add the content for each day next, then submit the plan for screening.
           </p>
         </div>
 

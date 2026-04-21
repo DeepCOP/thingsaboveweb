@@ -66,6 +66,30 @@ export type DevotionalDayInput = {
   content: string;
   scriptures: string[];
   id: string;
+  title?: string;
+};
+
+export type PlanSubmission = {
+  id: string;
+  plan_id: string;
+  submission_number: number;
+  status: 'submitted' | 'screening' | 'published' | 'rejected' | 'failed';
+  screening_decision: 'pass' | 'reject' | 'error' | null;
+  screening_summary: string | null;
+  screening_reason_codes: string[];
+  screening_confidence: number | null;
+  submitted_at: string;
+  screening_completed_at: string | null;
+  published_at: string | null;
+  rejected_at: string | null;
+};
+
+export type SubmitDevotionalPlanResult = {
+  submission_id: string;
+  plan_id: string;
+  submission_number: number;
+  status: 'submitted';
+  submitted_at: string;
 };
 
 export type DEvotionalPlanInput = {
