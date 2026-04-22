@@ -64,5 +64,5 @@ export const getLatestPlanSubmission = async (planId: string) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data as PlanSubmission | null;
 };

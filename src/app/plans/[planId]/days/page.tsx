@@ -147,7 +147,12 @@ export default function PlanDaysPage() {
       );
       return;
     }
-
+    if (hasActiveSubmission) {
+      alert(
+        'You have active plan submission in review, We kindly ask for your patience until the review is completed!',
+      );
+      return;
+    }
     const confirmed = window.confirm(
       'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
     );
@@ -174,11 +179,13 @@ export default function PlanDaysPage() {
   function getSubmitButtonLabel() {
     if (submitDevotionals.isPending) return 'Submitting...';
     if (hasActiveSubmission)
-      return latestSubmission?.status === 'screening' ? 'Screening...' : 'Queued for screening';
-    if (latestSubmission?.status === 'rejected') return 'Resubmit for screening';
-    if (latestSubmission?.status === 'failed') return 'Retry submission';
-    if (planQuery.data?.status === 'published') return 'Submit updated version';
-    return 'Submit for screening';
+      return latestSubmission?.status === 'screening'
+        ? 'Screening...'
+        : 'Under Review : Queued for Review';
+    if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
+    if (latestSubmission?.status === 'failed') return 'Retry Submission';
+    if (planQuery.data?.status === 'published') return 'Submit Updated Version';
+    return 'Submit for Review & Publish';
   }
 
   useEffect(() => {
@@ -400,6 +407,9 @@ function SubmissionStatusCard({
   latestSubmission: PlanSubmission | null;
   isPublished: boolean;
 }) {
+  const hasActiveSubmission =
+    latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+
   if (!latestSubmission) {
     return isPublished ? (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
@@ -412,15 +422,15 @@ function SubmissionStatusCard({
     ) : null;
   }
 
-  if (latestSubmission.status === 'submitted' || latestSubmission.status === 'screening') {
+  if (hasActiveSubmission) {
     return (
       <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-950">
         <p className="font-semibold">
           Submission #{latestSubmission.submission_number} is in review
         </p>
         <p className="mt-2 leading-6">
-          The submitted snapshot is frozen and being screened now. You can keep editing this draft,
-          but those edits won&apos;t affect the current submission unless you submit again later.
+          Your plan is currently being reviewed. You can keep making changes here, but they won’t be
+          included unless you submit again.
         </p>
       </div>
     );
