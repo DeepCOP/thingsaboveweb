@@ -179,9 +179,7 @@ export default function PlanDaysPage() {
   function getSubmitButtonLabel() {
     if (submitDevotionals.isPending) return 'Submitting...';
     if (hasActiveSubmission)
-      return latestSubmission?.status === 'screening'
-        ? 'Screening...'
-        : 'Under Review : Queued for Review';
+      return latestSubmission?.status === 'screening' ? 'Under Review' : 'Queued for Review';
     if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
     if (latestSubmission?.status === 'failed') return 'Retry Submission';
     if (planQuery.data?.status === 'published') return 'Submit Updated Version';
