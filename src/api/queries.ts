@@ -1,5 +1,4 @@
-import { createClient } from '@/src/lib/supabase/client';
-import { DevotionalDayInput } from '@/src/types/types';
+import { DevotionalDayInput, PlanSubmission } from '@/src/types/types';
 import supabase from '../lib/supabaseClient';
 
 export async function getDevotionalById(id: string) {
@@ -51,4 +50,19 @@ export const getDevotionalDays = async (planId: string) => {
 
   if (error) throw error;
   return data;
+};
+
+export const getLatestPlanSubmission = async (planId: string) => {
+  const { data, error } = await supabase
+    .from('plan_submissions')
+    .select(
+      'id, plan_id, submission_number, status, screening_decision, screening_summary, screening_reason_codes, screening_confidence, submitted_at, screening_completed_at, published_at, rejected_at',
+    )
+    .eq('plan_id', planId)
+    .order('submission_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as PlanSubmission | null;
 };

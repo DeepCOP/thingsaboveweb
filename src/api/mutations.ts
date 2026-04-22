@@ -1,18 +1,15 @@
-import {
-  DevotionalDayInput,
-  DevotionalPlan,
-  DevotionalPlanInsert,
-  DevotionalPlanUpdate,
-} from '@/src/types/types';
+import { DevotionalDayInput, DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import supabase from '../lib/supabaseClient';
 
-export async function submitDevotionalDays(planId: string, days: DevotionalDayInput[]) {
-  const { error } = await supabase.rpc('publish_devotional_plan', {
+export async function submitDevotionalPlanForScreening(planId: string, days: DevotionalDayInput[]) {
+  await saveDevotionalDraft(days, planId);
+
+  const { data, error } = await supabase.rpc('submit_devotional_plan_for_screening', {
     p_plan_id: planId as string,
-    p_days: days,
   });
 
   if (error) throw error;
+  return data?.[0] ?? null;
 }
 
 export async function createDevotionalPlan(payload: DevotionalPlanInsert) {

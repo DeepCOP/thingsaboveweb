@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -19,9 +19,14 @@ import RichTextEditor from '@/src/components/editor/RichTextEditor';
 import Spinner from '@/src/components/ui/Spinner';
 import { Checkbox } from '@/src/components/ui/checkbox';
 import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDevotionalDays';
-import { useGetDevotionalById, usePublishDevotionalPlan } from '@/src/hooks/useDevotionalPlan';
+import {
+  useGetDevotionalById,
+  useLatestPlanSubmission,
+  useSubmitDevotionalPlanForScreening,
+} from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { useAuth } from '@/src/state/AuthContext';
+import { PlanSubmission } from '@/src/types/types';
 
 type Day = {
   id: string;
@@ -44,10 +49,13 @@ function createEmptyDay(dayNumber: number): Day {
 export default function PlanDaysPage() {
   const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
-  const router = useRouter();
   const { session, loading: sessionLoading } = useAuth();
-  const submitDevotionals = usePublishDevotionalPlan(planId as string, session?.user?.id);
+  const submitDevotionals = useSubmitDevotionalPlanForScreening(
+    planId as string,
+    session?.user?.id,
+  );
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
+  const latestSubmissionQuery = useLatestPlanSubmission(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
   const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);
   const draftsQuery = useGetDevotionalDrafts(planId as string, session?.user?.id);
@@ -64,13 +72,17 @@ export default function PlanDaysPage() {
   const [openDays, setOpenDays] = useState<string[]>([]);
   const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const latestSubmission = latestSubmissionQuery.data ?? null;
+  const hasActiveSubmission =
+    latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
 
   const isLoading =
     submitDevotionals.isPending ||
     saveDraft.isPending ||
     draftsQuery.isLoading ||
     planQuery.isLoading ||
-    devotionalDays.isLoading;
+    devotionalDays.isLoading ||
+    latestSubmissionQuery.isLoading;
 
   function toggleDay(id: string) {
     setOpenDays((prev) =>
@@ -131,28 +143,47 @@ export default function PlanDaysPage() {
 
     if (!hasAcceptedContentStandards) {
       setSubmissionError(
-        'You must confirm your content complies with the Terms of Service and Statement of Faith before publishing.',
+        'You must confirm your content complies with the Terms of Service and Statement of Faith before submitting.',
       );
       return;
     }
-
+    if (hasActiveSubmission) {
+      alert(
+        'You have active plan submission in review, We kindly ask for your patience until the review is completed!',
+      );
+      return;
+    }
     const confirmed = window.confirm(
-      'Ready to publish this plan? You can still edit it later, but this will make it visible.',
+      'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
     );
     if (!confirmed) {
       return;
     }
 
     submitDevotionals.mutate(payload, {
-      onSuccess: () => {
-        alert('Plan submitted!');
-        router.push('/plans/my');
+      onSuccess: (submission) => {
+        latestSubmissionQuery.refetch();
+        alert(
+          submission
+            ? `Plan submitted for screening. Submission #${submission.submission_number} is now in review.`
+            : 'Plan submitted for screening.',
+        );
       },
       onError: (error) => {
         console.error(error);
-        alert('Something went wrong');
+        alert(error.message || 'Something went wrong');
       },
     });
+  }
+
+  function getSubmitButtonLabel() {
+    if (submitDevotionals.isPending) return 'Submitting...';
+    if (hasActiveSubmission)
+      return latestSubmission?.status === 'screening' ? 'Under Review' : 'Queued for Review';
+    if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
+    if (latestSubmission?.status === 'failed') return 'Retry Submission';
+    if (planQuery.data?.status === 'published') return 'Submit Updated Version';
+    return 'Submit for Review & Publish';
   }
 
   useEffect(() => {
@@ -230,9 +261,14 @@ export default function PlanDaysPage() {
         </div>
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
-          Add content and scripture for each day
+          Add content and scripture for each day, then submit the draft for screening.
         </p>
       </div>
+
+      <SubmissionStatusCard
+        latestSubmission={latestSubmission}
+        isPublished={planQuery.data?.status === 'published'}
+      />
 
       {planQuery.isLoading || draftsQuery.isLoading || devotionalDays.isLoading ? (
         <div className="flex items-center justify-center">
@@ -291,7 +327,7 @@ export default function PlanDaysPage() {
       )}
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
-        <p className="font-semibold">Before you publish</p>
+        <p className="font-semibold">Before you submit</p>
         <p className="mt-2 leading-6">
           ThingsAbove strictly enforces the rule that submitted content may not violate historical
           Christian principles. Review the{' '}
@@ -337,9 +373,9 @@ export default function PlanDaysPage() {
 
         <button
           onClick={submitDays}
-          disabled={isLoading}
+          disabled={isLoading || hasActiveSubmission}
           className="rounded-full bg-indigo-600 px-8 py-3 text-white">
-          {submitDevotionals.isPending ? 'Publishing...' : 'Publish'}
+          {getSubmitButtonLabel()}
         </button>
 
         <button
@@ -358,6 +394,90 @@ export default function PlanDaysPage() {
           {saveDraft.isPending ? 'Saving Draft...' : 'Save Draft'}
         </button>
       </div>
+    </div>
+  );
+}
+
+function SubmissionStatusCard({
+  latestSubmission,
+  isPublished,
+}: {
+  latestSubmission: PlanSubmission | null;
+  isPublished: boolean;
+}) {
+  const hasActiveSubmission =
+    latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+
+  if (!latestSubmission) {
+    return isPublished ? (
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+        <p className="font-semibold">This plan is live</p>
+        <p className="mt-2 leading-6">
+          The current published version is visible to readers now. Keep editing here, then submit an
+          updated draft whenever you&apos;re ready for another screening pass.
+        </p>
+      </div>
+    ) : null;
+  }
+
+  if (hasActiveSubmission) {
+    return (
+      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-950">
+        <p className="font-semibold">
+          Submission #{latestSubmission.submission_number} is in review
+        </p>
+        <p className="mt-2 leading-6">
+          Your plan is currently being reviewed. You can keep making changes here, but they won’t be
+          included unless you submit again.
+        </p>
+      </div>
+    );
+  }
+
+  if (latestSubmission.status === 'rejected') {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-950">
+        <p className="font-semibold">
+          Submission #{latestSubmission.submission_number} needs changes
+        </p>
+        <p className="mt-2 leading-6">
+          {latestSubmission.screening_summary ||
+            'This draft did not pass screening. Update the content and submit again.'}
+        </p>
+        {latestSubmission.screening_reason_codes.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {latestSubmission.screening_reason_codes.map((reasonCode) => (
+              <span
+                key={reasonCode}
+                className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700">
+                {reasonCode.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (latestSubmission.status === 'failed') {
+    return (
+      <div className="rounded-2xl border border-orange-200 bg-orange-50 p-5 text-sm text-orange-950">
+        <p className="font-semibold">The last submission didn&apos;t finish</p>
+        <p className="mt-2 leading-6">
+          {latestSubmission.screening_summary ||
+            'Something interrupted screening before it could finish. You can submit again.'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+      <p className="font-semibold">Submission #{latestSubmission.submission_number} published</p>
+      <p className="mt-2 leading-6">
+        This version passed screening and is now live. Keep editing here if you want to prepare an
+        updated submission.
+      </p>
     </div>
   );
 }

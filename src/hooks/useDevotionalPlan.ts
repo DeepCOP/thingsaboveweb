@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getDevotionalById,
+  getLatestPlanSubmission,
   getMyDevotionalPlans,
   getPlansReports,
   fetchPlanTags,
@@ -8,7 +9,7 @@ import {
 import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
 import { DevotionalDayInput } from '@/src/types/types';
-import { submitDevotionalDays } from '../api/mutations';
+import { submitDevotionalPlanForScreening } from '../api/mutations';
 
 export function useGetDevotionalById(id: string, userId: string | undefined) {
   return useQuery({
@@ -39,6 +40,20 @@ export function useGetPlanReports(user_id: string | undefined, planIds: string[]
     queryKey: ['my-devotiional-plans-reports', user_id, planIds],
     enabled: !!user_id && !!planIds.length,
     queryFn: async () => getPlansReports(planIds),
+  });
+}
+
+export function useLatestPlanSubmission(planId: string, userId: string | undefined) {
+  return useQuery({
+    queryKey: ['plan-submission', planId, userId],
+    enabled: !!planId && !!userId,
+    queryFn: async () => getLatestPlanSubmission(planId),
+    refetchInterval: (query) => {
+      const submission = query.state.data;
+      if (!submission) return false;
+
+      return submission.status === 'submitted' || submission.status === 'screening' ? 3000 : false;
+    },
   });
 }
 
@@ -79,14 +94,13 @@ export function useDeleteDevotionalPlan() {
   });
 }
 
-export function usePublishDevotionalPlan(planId: string, userId: string | undefined) {
+export function useSubmitDevotionalPlanForScreening(planId: string, userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (days: DevotionalDayInput[]) => submitDevotionalDays(planId, days),
+    mutationFn: (days: DevotionalDayInput[]) => submitDevotionalPlanForScreening(planId, days),
 
     onSuccess: () => {
-      // Invalidate related queries if needed
       queryClient.invalidateQueries({
         queryKey: ['devotional-plan', planId, userId],
       });
@@ -98,6 +112,9 @@ export function usePublishDevotionalPlan(planId: string, userId: string | undefi
       });
       queryClient.invalidateQueries({
         queryKey: ['my-devotional-plans', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plan-submission', planId, userId],
       });
     },
   });

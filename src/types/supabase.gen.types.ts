@@ -82,6 +82,13 @@ export type Database = {
             foreignKeyName: 'ai_notifications_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'ai_notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -94,10 +101,7 @@ export type Database = {
           generated_message: string | null;
           generated_title: string | null;
           id: string;
-          planner_payload: Json;
-          planner_reason: string | null;
-          planning_model: string | null;
-          priority: number | null;
+          planner_category: string | null;
           scheduled_for: string | null;
           sent: boolean | null;
           sent_at: string | null;
@@ -110,10 +114,7 @@ export type Database = {
           generated_message?: string | null;
           generated_title?: string | null;
           id?: string;
-          planner_payload?: Json;
-          planner_reason?: string | null;
-          planning_model?: string | null;
-          priority?: number | null;
+          planner_category?: string | null;
           scheduled_for?: string | null;
           sent?: boolean | null;
           sent_at?: string | null;
@@ -126,10 +127,7 @@ export type Database = {
           generated_message?: string | null;
           generated_title?: string | null;
           id?: string;
-          planner_payload?: Json;
-          planner_reason?: string | null;
-          planning_model?: string | null;
-          priority?: number | null;
+          planner_category?: string | null;
           scheduled_for?: string | null;
           sent?: boolean | null;
           sent_at?: string | null;
@@ -147,6 +145,147 @@ export type Database = {
           {
             foreignKeyName: 'ai_triggers_user_id_fkey';
             columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'ai_triggers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      bible_versions: {
+        Row: {
+          checksum: string | null;
+          created_at: string;
+          description: string;
+          id: string;
+          is_bundled: boolean;
+          is_enabled: boolean;
+          label: string;
+          language: string | null;
+          local_filename: string;
+          public_url: string | null;
+          short_label: string;
+          size_bytes: number;
+          sort_order: number;
+          storage_path: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          checksum?: string | null;
+          created_at?: string;
+          description?: string;
+          id: string;
+          is_bundled?: boolean;
+          is_enabled?: boolean;
+          label: string;
+          language?: string | null;
+          local_filename: string;
+          public_url?: string | null;
+          short_label: string;
+          size_bytes: number;
+          sort_order?: number;
+          storage_path?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          checksum?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          is_bundled?: boolean;
+          is_enabled?: boolean;
+          label?: string;
+          language?: string | null;
+          local_filename?: string;
+          public_url?: string | null;
+          short_label?: string;
+          size_bytes?: number;
+          sort_order?: number;
+          storage_path?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      church_invitations: {
+        Row: {
+          church_id: string;
+          created_at: string;
+          id: string;
+          invited_by: string;
+          invited_user_id: string;
+          responded_at: string | null;
+          status: string;
+        };
+        Insert: {
+          church_id: string;
+          created_at?: string;
+          id?: string;
+          invited_by: string;
+          invited_user_id: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          church_id?: string;
+          created_at?: string;
+          id?: string;
+          invited_by?: string;
+          invited_user_id?: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'church_invitations_church_id_fkey';
+            columns: ['church_id'];
+            isOneToOne: false;
+            referencedRelation: 'churches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_by_fkey';
+            columns: ['invited_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_by_fkey';
+            columns: ['invited_by'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_by_fkey';
+            columns: ['invited_by'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_user_id_fkey';
+            columns: ['invited_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_user_id_fkey';
+            columns: ['invited_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'church_invitations_invited_user_id_fkey';
+            columns: ['invited_user_id'];
             isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
@@ -504,6 +643,13 @@ export type Database = {
             foreignKeyName: 'friends_receiver_id_fkey';
             columns: ['receiver_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'friends_receiver_id_fkey';
+            columns: ['receiver_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -513,6 +659,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friends_requester_id_fkey';
+            columns: ['requester_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'friends_requester_id_fkey';
@@ -549,6 +702,13 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notification_preferences_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'notification_preferences_user_id_fkey';
@@ -602,6 +762,13 @@ export type Database = {
             foreignKeyName: 'notifications_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -648,6 +815,13 @@ export type Database = {
             foreignKeyName: 'plan_group_members_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'plan_group_members_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -688,6 +862,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plan_groups_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'plan_groups_created_by_fkey';
@@ -854,12 +1035,363 @@ export type Database = {
           },
         ];
       };
+      plan_screening_runs: {
+        Row: {
+          completed_at: string | null;
+          confidence: number | null;
+          created_at: string;
+          decision: string;
+          id: string;
+          model: string;
+          prompt_version: string;
+          provider: string;
+          raw_response: Json | null;
+          reason_codes: string[];
+          scores: Json;
+          submission_id: string;
+          summary: string | null;
+        };
+        Insert: {
+          completed_at?: string | null;
+          confidence?: number | null;
+          created_at?: string;
+          decision: string;
+          id?: string;
+          model: string;
+          prompt_version: string;
+          provider: string;
+          raw_response?: Json | null;
+          reason_codes?: string[];
+          scores?: Json;
+          submission_id: string;
+          summary?: string | null;
+        };
+        Update: {
+          completed_at?: string | null;
+          confidence?: number | null;
+          created_at?: string;
+          decision?: string;
+          id?: string;
+          model?: string;
+          prompt_version?: string;
+          provider?: string;
+          raw_response?: Json | null;
+          reason_codes?: string[];
+          scores?: Json;
+          submission_id?: string;
+          summary?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'plan_screening_runs_submission_id_fkey';
+            columns: ['submission_id'];
+            isOneToOne: false;
+            referencedRelation: 'plan_submissions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      plan_submissions: {
+        Row: {
+          author_id: string;
+          content_hash: string;
+          created_at: string;
+          id: string;
+          plan_id: string;
+          published_at: string | null;
+          rejected_at: string | null;
+          screening_completed_at: string | null;
+          screening_confidence: number | null;
+          screening_decision: string | null;
+          screening_reason_codes: string[];
+          screening_started_at: string | null;
+          screening_summary: string | null;
+          status: string;
+          submission_number: number;
+          submitted_at: string;
+          submitted_cover_image: string | null;
+          submitted_description: string;
+          submitted_payload: Json;
+          submitted_tags: string[];
+          submitted_title: string;
+          submitted_total_days: number;
+          updated_at: string;
+        };
+        Insert: {
+          author_id: string;
+          content_hash: string;
+          created_at?: string;
+          id?: string;
+          plan_id: string;
+          published_at?: string | null;
+          rejected_at?: string | null;
+          screening_completed_at?: string | null;
+          screening_confidence?: number | null;
+          screening_decision?: string | null;
+          screening_reason_codes?: string[];
+          screening_started_at?: string | null;
+          screening_summary?: string | null;
+          status: string;
+          submission_number: number;
+          submitted_at?: string;
+          submitted_cover_image?: string | null;
+          submitted_description: string;
+          submitted_payload: Json;
+          submitted_tags?: string[];
+          submitted_title: string;
+          submitted_total_days: number;
+          updated_at?: string;
+        };
+        Update: {
+          author_id?: string;
+          content_hash?: string;
+          created_at?: string;
+          id?: string;
+          plan_id?: string;
+          published_at?: string | null;
+          rejected_at?: string | null;
+          screening_completed_at?: string | null;
+          screening_confidence?: number | null;
+          screening_decision?: string | null;
+          screening_reason_codes?: string[];
+          screening_started_at?: string | null;
+          screening_summary?: string | null;
+          status?: string;
+          submission_number?: number;
+          submitted_at?: string;
+          submitted_cover_image?: string | null;
+          submitted_description?: string;
+          submitted_payload?: Json;
+          submitted_tags?: string[];
+          submitted_title?: string;
+          submitted_total_days?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'plan_submissions_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plan_submissions_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'plan_submissions_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'plan_submissions_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'devotional_plans';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plan_submissions_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'devotional_plans_view';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      prayer_request_encouragements: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          request_id: string;
+          user_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          request_id: string;
+          user_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          request_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prayer_request_encouragements_request_id_fkey';
+            columns: ['request_id'];
+            isOneToOne: false;
+            referencedRelation: 'prayer_requests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_encouragements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_encouragements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_encouragements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      prayer_request_prayers: {
+        Row: {
+          created_at: string;
+          request_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          request_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          request_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prayer_request_prayers_request_id_fkey';
+            columns: ['request_id'];
+            isOneToOne: false;
+            referencedRelation: 'prayer_requests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_prayers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_prayers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'prayer_request_prayers_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      prayer_requests: {
+        Row: {
+          allow_comments: boolean;
+          answered_at: string | null;
+          category: string;
+          church_id: string | null;
+          content: string;
+          created_at: string;
+          id: string;
+          is_anonymous: boolean;
+          is_answered: boolean;
+          is_urgent: boolean;
+          scope: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          allow_comments?: boolean;
+          answered_at?: string | null;
+          category: string;
+          church_id?: string | null;
+          content: string;
+          created_at?: string;
+          id?: string;
+          is_anonymous?: boolean;
+          is_answered?: boolean;
+          is_urgent?: boolean;
+          scope: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          allow_comments?: boolean;
+          answered_at?: string | null;
+          category?: string;
+          church_id?: string | null;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          is_anonymous?: boolean;
+          is_answered?: boolean;
+          is_urgent?: boolean;
+          scope?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prayer_requests_church_id_fkey';
+            columns: ['church_id'];
+            isOneToOne: false;
+            referencedRelation: 'churches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_requests_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prayer_requests_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'prayer_requests_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_behavior_snapshot';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
       profiles: {
         Row: {
+          app_version: string | null;
           avatar_url: string | null;
           bio: string | null;
           church_id: string | null;
+          church_joined_at: string | null;
           created_at: string | null;
+          device_os: string | null;
+          device_os_version: string | null;
           email: string;
           expo_push_token: string | null;
           first_name: string;
@@ -872,10 +1404,14 @@ export type Database = {
           year_believed: number | null;
         };
         Insert: {
+          app_version?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
           church_id?: string | null;
+          church_joined_at?: string | null;
           created_at?: string | null;
+          device_os?: string | null;
+          device_os_version?: string | null;
           email: string;
           expo_push_token?: string | null;
           first_name: string;
@@ -888,10 +1424,14 @@ export type Database = {
           year_believed?: number | null;
         };
         Update: {
+          app_version?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
           church_id?: string | null;
+          church_joined_at?: string | null;
           created_at?: string | null;
+          device_os?: string | null;
+          device_os_version?: string | null;
           email?: string;
           expo_push_token?: string | null;
           first_name?: string;
@@ -1023,6 +1563,13 @@ export type Database = {
             foreignKeyName: 'scripture_note_helpful_votes_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'scripture_note_helpful_votes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -1090,6 +1637,13 @@ export type Database = {
             foreignKeyName: 'scripture_notes_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_behavior_scored';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'scripture_notes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_behavior_snapshot';
             referencedColumns: ['user_id'];
           },
@@ -1097,6 +1651,8 @@ export type Database = {
       };
       scripture_references: {
         Row: {
+          book_reference: string[] | null;
+          chapter_reference: string[] | null;
           created_at: string | null;
           day_id: string | null;
           id: string;
@@ -1105,6 +1661,8 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
+          book_reference?: string[] | null;
+          chapter_reference?: string[] | null;
           created_at?: string | null;
           day_id?: string | null;
           id?: string;
@@ -1113,6 +1671,8 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
+          book_reference?: string[] | null;
+          chapter_reference?: string[] | null;
           created_at?: string | null;
           day_id?: string | null;
           id?: string;
@@ -1132,6 +1692,8 @@ export type Database = {
       };
       scripture_references_draft: {
         Row: {
+          book_reference: string[] | null;
+          chapter_reference: string[] | null;
           created_at: string | null;
           day_id: string | null;
           id: string;
@@ -1140,6 +1702,8 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
+          book_reference?: string[] | null;
+          chapter_reference?: string[] | null;
           created_at?: string | null;
           day_id?: string | null;
           id?: string;
@@ -1148,6 +1712,8 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
+          book_reference?: string[] | null;
+          chapter_reference?: string[] | null;
           created_at?: string | null;
           day_id?: string | null;
           id?: string;
@@ -1221,27 +1787,103 @@ export type Database = {
         };
         Relationships: [];
       };
-      user_behavior_snapshot: {
+      user_behavior_scored: {
         Row: {
           abandoned_plans: number | null;
           active_plans: number | null;
+          church_address: string | null;
+          church_id: string | null;
+          church_name: string | null;
+          church_website_url: string | null;
           commented_recently: boolean | null;
+          friends_count: number | null;
+          group_plans_count: number | null;
+          has_church: boolean | null;
           has_friends: boolean | null;
           has_group_plan: boolean | null;
           last_activity_at: string | null;
+          last_comment_at: string | null;
+          last_day_item_at: string | null;
+          last_plan_progress_at: string | null;
           last_seen: string | null;
           max_days_completed: number | null;
+          notification_score: number | null;
+          notification_score_breakdown: Json | null;
           plans_completed: number | null;
+          plans_completed_recently: number | null;
           plans_started: number | null;
+          profile_created_at: string | null;
+          profile_updated_at: string | null;
+          score_abandoned_plans: number | null;
+          score_active_plans: number | null;
+          score_activity_need: number | null;
+          score_church_connection: number | null;
+          score_consistency: number | null;
+          score_light_engagement: number | null;
+          score_recent_completion: number | null;
+          score_seen_recency: number | null;
+          score_social_isolation: number | null;
           time_since_last_activity: string | null;
           time_since_last_seen: string | null;
           timezone: string | null;
           user_id: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_church_id_fkey';
+            columns: ['church_id'];
+            isOneToOne: false;
+            referencedRelation: 'churches';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      user_behavior_snapshot: {
+        Row: {
+          abandoned_plans: number | null;
+          active_plans: number | null;
+          church_address: string | null;
+          church_id: string | null;
+          church_name: string | null;
+          church_website_url: string | null;
+          commented_recently: boolean | null;
+          friends_count: number | null;
+          group_plans_count: number | null;
+          has_church: boolean | null;
+          has_friends: boolean | null;
+          has_group_plan: boolean | null;
+          last_activity_at: string | null;
+          last_comment_at: string | null;
+          last_day_item_at: string | null;
+          last_plan_progress_at: string | null;
+          last_seen: string | null;
+          max_days_completed: number | null;
+          plans_completed: number | null;
+          plans_completed_recently: number | null;
+          plans_started: number | null;
+          profile_created_at: string | null;
+          profile_updated_at: string | null;
+          time_since_last_activity: string | null;
+          time_since_last_seen: string | null;
+          timezone: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_church_id_fkey';
+            columns: ['church_id'];
+            isOneToOne: false;
+            referencedRelation: 'churches';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
     Functions: {
+      accept_church_invite: {
+        Args: { p_church_id: string };
+        Returns: undefined;
+      };
       accept_friend_request: {
         Args: { p_requester_id: string };
         Returns: undefined;
@@ -1276,6 +1918,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      add_prayer_request_encouragement: {
+        Args: { p_content: string; p_request_id: string };
+        Returns: string;
+      };
       add_scripture_note: {
         Args: {
           p_book: string;
@@ -1292,6 +1938,30 @@ export type Database = {
       add_user_to_existing_plan_group: {
         Args: { p_friends_ids: string[]; p_group_id: string };
         Returns: undefined;
+      };
+      assert_valid_church_restrictions: {
+        Args: {
+          p_address?: string;
+          p_name?: string;
+          p_require_name?: boolean;
+          p_website_url?: string;
+        };
+        Returns: undefined;
+      };
+      assert_valid_profile_restrictions: {
+        Args: {
+          p_bio?: string;
+          p_first_name?: string;
+          p_last_name?: string;
+          p_require_name?: boolean;
+          p_year_baptized?: number;
+          p_year_believed?: number;
+        };
+        Returns: undefined;
+      };
+      can_access_prayer_scope: {
+        Args: { p_church_id: string; p_scope: string };
+        Returns: boolean;
       };
       create_notification: {
         Args: {
@@ -1329,11 +1999,27 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      create_prayer_request: {
+        Args: {
+          p_allow_comments?: boolean;
+          p_category: string;
+          p_content: string;
+          p_is_anonymous?: boolean;
+          p_is_urgent?: boolean;
+          p_scope: string;
+        };
+        Returns: string;
+      };
+      current_user_church_id: { Args: never; Returns: string };
+      decline_church_invite: {
+        Args: { p_church_id: string };
+        Returns: undefined;
+      };
       decline_friend_request: {
         Args: { p_requester_id: string };
         Returns: undefined;
       };
-      plan_tags: { Args: never; Returns: string[] };
+      devotional_plan_allowed_tags: { Args: never; Returns: string[] };
       ensure_day_items_exist: {
         Args: {
           p_day_id: string;
@@ -1347,6 +2033,22 @@ export type Database = {
       find_or_create_church: {
         Args: { p_address?: string; p_name?: string; p_website_url?: string };
         Returns: string;
+      };
+      get_church_analytics: { Args: { p_church_id: string }; Returns: Json };
+      get_church_members: {
+        Args: {
+          p_church_id: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_search?: string;
+        };
+        Returns: {
+          avatar_url: string;
+          church_joined_at: string;
+          first_name: string;
+          id: string;
+          last_name: string;
+        }[];
       };
       get_day_items_progress: {
         Args: {
@@ -1382,6 +2084,8 @@ export type Database = {
       get_devotional_days_with_scriptures: {
         Args: { p_plan_id: string };
         Returns: {
+          book_reference: string[];
+          chapter_reference: string[];
           content: string;
           day_id: string;
           day_number: number;
@@ -1392,6 +2096,8 @@ export type Database = {
       get_devotional_drafts: {
         Args: { _plan_id: string };
         Returns: {
+          book_reference: string[];
+          chapter_reference: string[];
           content: string;
           day_id: string;
           day_number: number;
@@ -1495,6 +2201,35 @@ export type Database = {
           user_id: string;
         }[];
       };
+      get_plan_group_invitation: {
+        Args: { p_group_id: string };
+        Returns: {
+          completed_days: number;
+          created_at: string;
+          created_by: string;
+          id: string;
+          inviter_avatar_url: string;
+          inviter_first_name: string;
+          inviter_id: string;
+          inviter_last_name: string;
+          max_members: number;
+          plan_id: string;
+          start_date: string;
+        }[];
+      };
+      get_plan_group_invitation_members: {
+        Args: { p_group_id: string };
+        Returns: {
+          avatar_url: string;
+          first_name: string;
+          id: string;
+          joined_at: string;
+          last_name: string;
+          profile_id: string;
+          status: string;
+          user_id: string;
+        }[];
+      };
       get_plan_reaction_summary: {
         Args: { p_plan_id: string };
         Returns: {
@@ -1502,6 +2237,66 @@ export type Database = {
           user_reaction: string;
         }[];
       };
+      get_prayer_request_detail: {
+        Args: { p_request_id: string };
+        Returns: {
+          allow_comments: boolean;
+          answered_at: string;
+          author_avatar_url: string;
+          author_first_name: string;
+          author_last_name: string;
+          category: string;
+          church_id: string;
+          church_name: string;
+          content: string;
+          created_at: string;
+          encouragement_count: number;
+          id: string;
+          is_anonymous: boolean;
+          is_answered: boolean;
+          is_urgent: boolean;
+          prayer_count: number;
+          scope: string;
+          updated_at: string;
+          user_id: string;
+          viewer_has_prayed: boolean;
+          viewer_is_owner: boolean;
+        }[];
+      };
+      get_prayer_requests: {
+        Args: {
+          p_before_created_at?: string;
+          p_before_id?: string;
+          p_before_is_urgent?: boolean;
+          p_filter?: string;
+          p_limit?: number;
+          p_scope?: string;
+        };
+        Returns: {
+          allow_comments: boolean;
+          answered_at: string;
+          author_avatar_url: string;
+          author_first_name: string;
+          author_last_name: string;
+          category: string;
+          church_id: string;
+          church_name: string;
+          content: string;
+          created_at: string;
+          encouragement_count: number;
+          id: string;
+          is_anonymous: boolean;
+          is_answered: boolean;
+          is_urgent: boolean;
+          prayer_count: number;
+          scope: string;
+          updated_at: string;
+          user_id: string;
+          viewer_has_prayed: boolean;
+          viewer_is_owner: boolean;
+        }[];
+      };
+      get_profile: { Args: { p_user_id: string }; Returns: Json };
       get_scripture_notes: {
         Args: {
           p_limit?: number;
@@ -1542,9 +2337,29 @@ export type Database = {
           requester_id: string;
         }[];
       };
+      invite_users_to_church: {
+        Args: { p_church_id: string; p_user_ids: string[] };
+        Returns: undefined;
+      };
       is_group_member: { Args: { p_group_id: string }; Returns: boolean };
+      list_ai_notification_planning_candidates: {
+        Args: { p_limit?: number };
+        Returns: {
+          bio: string;
+          first_name: string;
+          planning_context: Json;
+          timezone: string;
+          user_id: string;
+          year_baptized: number;
+          year_believed: number;
+        }[];
+      };
       mark_notification_read: {
         Args: { p_notification_id: string };
+        Returns: undefined;
+      };
+      mark_prayer_request_answered: {
+        Args: { p_is_answered?: boolean; p_request_id: string };
         Returns: undefined;
       };
       normalize_church_text: { Args: { p_value: string }; Returns: string };
@@ -1552,14 +2367,23 @@ export type Database = {
         Args: { p_value: string };
         Returns: string;
       };
+      plan_tags: { Args: never; Returns: string[] };
       publish_devotional_plan: {
         Args: { p_days: Json; p_plan_id: string };
+        Returns: undefined;
+      };
+      publish_submitted_devotional_plan: {
+        Args: { p_submission_id: string };
         Returns: undefined;
       };
       queue_daily_notifications: { Args: never; Returns: undefined };
       report_plan: {
         Args: { p_plan_id: string; p_reason: string };
         Returns: undefined;
+      };
+      resolve_ai_trigger_schedule: {
+        Args: { p_day_offset: number; p_local_hour: number; p_timezone: string };
+        Returns: string;
       };
       save_devotional_draft: {
         Args: { _days: Json; _plan_id: string };
@@ -1642,6 +2466,16 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      submit_devotional_plan_for_screening: {
+        Args: { p_plan_id: string };
+        Returns: {
+          plan_id: string;
+          status: string;
+          submission_id: string;
+          submission_number: number;
+          submitted_at: string;
+        }[];
+      };
       tags_to_text: { Args: { tags: string[] }; Returns: string };
       toggle_day_completion: {
         Args: {
@@ -1667,6 +2501,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      toggle_prayer_request_support: {
+        Args: { p_request_id: string };
+        Returns: boolean;
+      };
       toggle_reaction: {
         Args: { p_plan_id: string; p_reaction_type: string };
         Returns: string;
@@ -1679,6 +2517,18 @@ export type Database = {
         }[];
       };
       unread_notifications_count: { Args: never; Returns: number };
+      update_prayer_request: {
+        Args: {
+          p_allow_comments?: boolean;
+          p_category: string;
+          p_content: string;
+          p_is_anonymous?: boolean;
+          p_is_urgent?: boolean;
+          p_request_id: string;
+          p_scope: string;
+        };
+        Returns: string;
+      };
       update_profile:
         | {
             Args: {
