@@ -12,7 +12,7 @@ const sections = [
   {
     title: 'The Holy Scriptures',
     paragraphs: [
-      'We believe the Old and New Testaments are the inspired Word of God and the final written authority for Christian faith, doctrine, and life.',
+      'We believe that the Old and New Testaments alone are the inspired and authoritative written Word of God for Christian faith, doctrine, and life.',
       'We believe scripture is trustworthy, sufficient, and uniquely authoritative for teaching, correction, and discipleship.',
     ],
   },
