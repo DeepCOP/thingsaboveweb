@@ -21,6 +21,7 @@ export async function createDevotionalPlan(payload: DevotionalPlanInsert) {
     author_id: payload.author_id,
     cover_image: payload.cover_image,
     tags: payload.tags,
+    visibility: payload.visibility,
   });
 
   if (error) throw error;
@@ -50,6 +51,7 @@ export const updateDevotionalPlan = async (input: DevotionalPlanUpdate) => {
       total_days: input.total_days,
       cover_image: input.cover_image,
       tags: input.tags,
+      visibility: input.visibility,
     })
     .eq('id', input.id);
 

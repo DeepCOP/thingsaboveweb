@@ -5,7 +5,7 @@ export async function getDevotionalById(id: string) {
   const { data, error } = await supabase.from('devotional_plans').select('*').eq('id', id).single();
 
   if (error) throw error;
-  console.log('data', data);
+  console.log(error);
 
   return data;
 }
