@@ -75,6 +75,9 @@ export default function PlanDaysPage() {
   const latestSubmission = latestSubmissionQuery.data ?? null;
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const planVisibility: 'public' | 'private' =
+    planQuery.data?.visibility === 'private' ? 'private' : 'public';
+  const isPrivatePlan = planVisibility === 'private';
 
   const isLoading =
     submitDevotionals.isPending ||
@@ -154,7 +157,9 @@ export default function PlanDaysPage() {
       return;
     }
     const confirmed = window.confirm(
-      'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
+      isPrivatePlan
+        ? 'Ready to submit this private plan for screening? The current draft will be frozen for review. If it passes, it will stay private and only people you manually invite can join.'
+        : 'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
     );
     if (!confirmed) {
       return;
@@ -165,8 +170,12 @@ export default function PlanDaysPage() {
         latestSubmissionQuery.refetch();
         alert(
           submission
-            ? `Plan submitted for screening. Submission #${submission.submission_number} is now in review.`
-            : 'Plan submitted for screening.',
+            ? isPrivatePlan
+              ? `Private plan submitted for screening. Submission #${submission.submission_number} is now in review.`
+              : `Plan submitted for screening. Submission #${submission.submission_number} is now in review.`
+            : isPrivatePlan
+              ? 'Private plan submitted for screening.'
+              : 'Plan submitted for screening.',
         );
       },
       onError: (error) => {
@@ -183,7 +192,7 @@ export default function PlanDaysPage() {
     if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
     if (latestSubmission?.status === 'failed') return 'Retry Submission';
     if (planQuery.data?.status === 'published') return 'Submit Updated Version';
-    return 'Submit for Review & Publish';
+    return isPrivatePlan ? 'Submit for Review' : 'Submit for Review & Publish';
   }
 
   useEffect(() => {
@@ -197,7 +206,7 @@ export default function PlanDaysPage() {
             day_number: day.day_number,
             content: day.content,
             scriptures: day.scriptures ?? [],
-            title: day.title,
+            title: day.title ?? '',
           })),
         );
 
@@ -220,7 +229,7 @@ export default function PlanDaysPage() {
         day_number: day.day_number,
         content: day.content,
         scriptures: day.scriptures ?? [],
-        title: day.title,
+        title: day.title ?? '',
       })),
     );
     initializedRef.current = true;
@@ -258,16 +267,25 @@ export default function PlanDaysPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
             {planQuery.data ? planQuery.data.title : 'Write Your Devotional'}
           </h1>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+              isPrivatePlan ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+            }`}>
+            {isPrivatePlan ? 'Private' : 'Public'}
+          </span>
         </div>
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
-          Add content and scripture for each day, then submit the draft for screening.
+          {isPrivatePlan
+            ? 'Add content and scripture for each day, then submit the draft for screening. Approved private plans stay hidden from discovery and can be shared manually.'
+            : 'Add content and scripture for each day, then submit the draft for screening. Approved public plans become discoverable in plan lists and search.'}
         </p>
       </div>
 
       <SubmissionStatusCard
         latestSubmission={latestSubmission}
         isPublished={planQuery.data?.status === 'published'}
+        visibility={planVisibility}
       />
 
       {planQuery.isLoading || draftsQuery.isLoading || devotionalDays.isLoading ? (
@@ -301,13 +319,13 @@ export default function PlanDaysPage() {
                   <input
                     type="text"
                     placeholder="Day title (optional)"
-                    value={day.title}
+                    value={day.title ?? ''}
                     maxLength={DAY_TITLE_MAX}
                     onChange={(e) => updateDay(index, { title: e.target.value })}
                     className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <p className="text-xs text-gray-500">
-                    {day.title.length}/{DAY_TITLE_MAX}
+                    {(day.title ?? '').length}/{DAY_TITLE_MAX}
                   </p>
 
                   <RichTextEditor
@@ -338,7 +356,7 @@ export default function PlanDaysPage() {
           <Link href="/statement-of-faith" className="underline underline-offset-4">
             Statement of Faith
           </Link>{' '}
-          before making this plan public.
+          before publishing or sharing this plan.
         </p>
         <div className="mt-4 flex items-start gap-3">
           <Checkbox
@@ -401,20 +419,24 @@ export default function PlanDaysPage() {
 function SubmissionStatusCard({
   latestSubmission,
   isPublished,
+  visibility,
 }: {
   latestSubmission: PlanSubmission | null;
   isPublished: boolean;
+  visibility: 'public' | 'private';
 }) {
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const isPrivatePlan = visibility === 'private';
 
   if (!latestSubmission) {
     return isPublished ? (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
         <p className="font-semibold">This plan is live</p>
         <p className="mt-2 leading-6">
-          The current published version is visible to readers now. Keep editing here, then submit an
-          updated draft whenever you&apos;re ready for another screening pass.
+          {isPrivatePlan
+            ? 'The current approved version is live in private mode. Keep editing here, then submit an updated draft whenever you are ready for another screening pass.'
+            : 'The current published version is visible to readers now. Keep editing here, then submit an updated draft whenever you are ready for another screening pass.'}
         </p>
       </div>
     ) : null;
@@ -444,9 +466,9 @@ function SubmissionStatusCard({
           {latestSubmission.screening_summary ||
             'This draft did not pass screening. Update the content and submit again.'}
         </p>
-        {latestSubmission.screening_reason_codes.length > 0 && (
+        {(latestSubmission.screening_reason_codes ?? []).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {latestSubmission.screening_reason_codes.map((reasonCode) => (
+            {(latestSubmission.screening_reason_codes ?? []).map((reasonCode) => (
               <span
                 key={reasonCode}
                 className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700">
@@ -475,8 +497,9 @@ function SubmissionStatusCard({
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
       <p className="font-semibold">Submission #{latestSubmission.submission_number} published</p>
       <p className="mt-2 leading-6">
-        This version passed screening and is now live. Keep editing here if you want to prepare an
-        updated submission.
+        {isPrivatePlan
+          ? 'This version passed screening and is now live in private mode. People can only access it when you share it with them manually.'
+          : 'This version passed screening and is now live. Keep editing here if you want to prepare an updated submission.'}
       </p>
     </div>
   );

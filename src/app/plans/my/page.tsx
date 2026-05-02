@@ -22,7 +22,10 @@ export default function MyPlansPage() {
     planIds || [],
   );
   const draftPlans = data?.filter((p) => p.status === 'draft') ?? [];
-  const publishedPlans = data?.filter((p) => p.status === 'published') ?? [];
+  const privatePlans =
+    data?.filter((p) => p.status === 'published' && p.visibility === 'private') ?? [];
+  const publicPlans =
+    data?.filter((p) => p.status === 'published' && p.visibility !== 'private') ?? [];
 
   if (plansLoading || sessionLoading || reportsLoading) {
     return (
@@ -82,13 +85,44 @@ export default function MyPlansPage() {
 
       {/* ================= Published Plans ================= */}
       <section className="space-y-6">
-        <h2 className="text-xl font-semibold">Published</h2>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Private Plans</h2>
+          <p className="text-sm text-gray-500">
+            Approved, but hidden from discovery. Readers can only join when you share them manually.
+          </p>
+        </div>
 
-        {publishedPlans.length === 0 ? (
-          <p className="text-gray-500 text-sm">No published plans yet</p>
+        {privatePlans.length === 0 ? (
+          <p className="text-gray-500 text-sm">No private plans yet</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {publishedPlans.map((plan) => (
+            {privatePlans.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                onContinue={() => router.push(`/plans/${plan.id}/days`)}
+                reports={reports || []}
+                onDelete={deletePlan.mutate}
+                deleting={deletePlan.isPending}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Public Plans</h2>
+          <p className="text-sm text-gray-500">
+            Approved and discoverable in plan lists and search.
+          </p>
+        </div>
+
+        {publicPlans.length === 0 ? (
+          <p className="text-gray-500 text-sm">No public plans yet</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {publicPlans.map((plan) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}

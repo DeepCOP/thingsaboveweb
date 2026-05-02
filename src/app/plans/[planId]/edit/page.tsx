@@ -27,6 +27,7 @@ export default function EditPlanPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const initializedRef = useRef(false);
@@ -47,6 +48,7 @@ export default function EditPlanPage() {
 
     setTitle(planQuery.data.title);
     setDescription(planQuery.data.description);
+    setVisibility(planQuery.data.visibility === 'private' ? 'private' : 'public');
     setPreview(planQuery.data.cover_image);
     const tags = Array.isArray(planQuery.data.tags) ? planQuery.data.tags.filter(Boolean) : [];
     setSelectedTags(tags);
@@ -97,6 +99,7 @@ export default function EditPlanPage() {
         id: planId as string,
         title,
         description,
+        visibility,
         cover_image: coverUrl,
         tags: selectedTags.length ? selectedTags : null,
       },
@@ -133,6 +136,41 @@ export default function EditPlanPage() {
       <p className="text-xs text-gray-500">
         {description.length}/{DESCRIPTION_MAX}
       </p>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">Visibility</label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setVisibility('public')}
+            className={`rounded-2xl border p-4 text-left transition ${
+              visibility === 'public'
+                ? 'border-indigo-600 bg-indigo-50 text-indigo-900'
+                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+            }`}>
+            <p className="font-semibold">Public plan</p>
+            <p className="mt-2 text-sm leading-6 text-current/80">
+              Discoverable after screening. Readers can find it in plan lists and search.
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setVisibility('private')}
+            className={`rounded-2xl border p-4 text-left transition ${
+              visibility === 'private'
+                ? 'border-amber-500 bg-amber-50 text-amber-950'
+                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+            }`}>
+            <p className="font-semibold">Private plan</p>
+            <p className="mt-2 text-sm leading-6 text-current/80">
+              Hidden from discovery. Only people you manually share it with can join.
+            </p>
+          </button>
+        </div>
+        <p className="mt-2 text-sm text-gray-500">
+          Changes apply the next time this plan passes screening.
+        </p>
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>

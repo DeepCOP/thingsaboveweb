@@ -14,6 +14,7 @@ export default function CreatePlanPage() {
   const { session } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [totalDays, setTotalDays] = useState(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -78,6 +79,7 @@ export default function CreatePlanPage() {
         id: planId,
         title,
         description,
+        visibility,
         total_days: totalDays,
         cover_image: coverImageUrl,
         tags: selectedTags.length ? selectedTags : null,
@@ -103,7 +105,8 @@ export default function CreatePlanPage() {
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-200">
             Start with the basics here. You&apos;ll add each day next, then submit the finished
-            draft for screening. If it passes, it will publish automatically.
+            draft for screening. If it passes, it will publish automatically with the visibility you
+            choose here.
           </p>
         </div>
 
@@ -155,6 +158,43 @@ export default function CreatePlanPage() {
           />
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
             {description.length}/{DESCRIPTION_MAX}
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Visibility
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setVisibility('public')}
+              className={`rounded-2xl border p-4 text-left transition ${
+                visibility === 'public'
+                  ? 'border-indigo-600 bg-indigo-50 text-indigo-900'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              }`}>
+              <p className="font-semibold">Public plan</p>
+              <p className="mt-2 text-sm leading-6 text-current/80">
+                Discoverable after screening. Readers can find it in plan lists and search.
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibility('private')}
+              className={`rounded-2xl border p-4 text-left transition ${
+                visibility === 'private'
+                  ? 'border-amber-500 bg-amber-50 text-amber-950'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              }`}>
+              <p className="font-semibold">Private plan</p>
+              <p className="mt-2 text-sm leading-6 text-current/80">
+                Hidden from discovery. Only people you manually share it with can join.
+              </p>
+            </button>
+          </div>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            You can change this later from the edit page.
           </p>
         </div>
 
