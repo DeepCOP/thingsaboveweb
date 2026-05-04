@@ -78,6 +78,7 @@ export type PlanSubmission = {
   screening_summary: string | null;
   screening_reason_codes: string[];
   screening_confidence: number | null;
+  submitted_visibility: 'public' | 'private';
   submitted_at: string;
   screening_completed_at: string | null;
   published_at: string | null;

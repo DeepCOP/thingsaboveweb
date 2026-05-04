@@ -1118,6 +1118,7 @@ export type Database = {
           submitted_tags: string[];
           submitted_title: string;
           submitted_total_days: number;
+          submitted_visibility: string;
           updated_at: string;
         };
         Insert: {
@@ -1143,6 +1144,7 @@ export type Database = {
           submitted_tags?: string[];
           submitted_title: string;
           submitted_total_days: number;
+          submitted_visibility?: string;
           updated_at?: string;
         };
         Update: {
@@ -1168,6 +1170,7 @@ export type Database = {
           submitted_tags?: string[];
           submitted_title?: string;
           submitted_total_days?: number;
+          submitted_visibility?: string;
           updated_at?: string;
         };
         Relationships: [
@@ -2474,7 +2477,7 @@ export type Database = {
         };
       };
       submit_devotional_plan_for_screening: {
-        Args: { p_plan_id: string };
+        Args: { p_plan_id: string; p_visibility?: string };
         Returns: {
           plan_id: string;
           status: string;

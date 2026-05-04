@@ -5,7 +5,6 @@ export async function getDevotionalById(id: string) {
   const { data, error } = await supabase.from('devotional_plans').select('*').eq('id', id).single();
 
   if (error) throw error;
-  console.log(error);
 
   return data;
 }
@@ -56,7 +55,7 @@ export const getLatestPlanSubmission = async (planId: string) => {
   const { data, error } = await supabase
     .from('plan_submissions')
     .select(
-      'id, plan_id, submission_number, status, screening_decision, screening_summary, screening_reason_codes, screening_confidence, submitted_at, screening_completed_at, published_at, rejected_at',
+      'id, plan_id, submission_number, status, screening_decision, screening_summary, screening_reason_codes, screening_confidence, submitted_visibility, submitted_at, screening_completed_at, published_at, rejected_at',
     )
     .eq('plan_id', planId)
     .order('submission_number', { ascending: false })

@@ -50,11 +50,14 @@ export default function PlanDaysPage() {
   const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
   const { session, loading: sessionLoading } = useAuth();
+  const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
+  const planVisibility: 'public' | 'private' =
+    planQuery.data?.visibility === 'private' ? 'private' : 'public';
   const submitDevotionals = useSubmitDevotionalPlanForScreening(
     planId as string,
     session?.user?.id,
+    planVisibility,
   );
-  const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
   const latestSubmissionQuery = useLatestPlanSubmission(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
   const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);
@@ -75,8 +78,6 @@ export default function PlanDaysPage() {
   const latestSubmission = latestSubmissionQuery.data ?? null;
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
-  const planVisibility: 'public' | 'private' =
-    planQuery.data?.visibility === 'private' ? 'private' : 'public';
   const isPrivatePlan = planVisibility === 'private';
 
   const isLoading =

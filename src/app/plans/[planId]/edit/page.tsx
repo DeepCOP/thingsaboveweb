@@ -6,6 +6,8 @@ import { useAuth } from '@/src/state/AuthContext';
 import {
   usePlanTags,
   useGetDevotionalById,
+  useLatestPlanSubmission,
+  useSubmitPlanForScreening,
   useUpdateDevotionalPlan,
 } from '@/src/hooks/useDevotionalPlan';
 import { uploadPlanCover } from '@/src/lib/utils';
@@ -17,7 +19,13 @@ export default function EditPlanPage() {
   const { session, loading: sessionLoading } = useAuth();
   const router = useRouter();
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
+  const latestSubmissionQuery = useLatestPlanSubmission(planId as string, session?.user?.id);
   const updatePlan = useUpdateDevotionalPlan();
+  const submitPublicVisibilityReview = useSubmitPlanForScreening(
+    planId as string,
+    session?.user?.id,
+    'public',
+  );
   const {
     data: availableTags = [],
     isLoading: isPlanTags,
@@ -55,7 +63,20 @@ export default function EditPlanPage() {
     initializedRef.current = true;
   }, [planQuery.data]);
 
-  if (planQuery.isLoading || sessionLoading) {
+  useEffect(() => {
+    if (!planQuery.data) {
+      return;
+    }
+
+    const submission = latestSubmissionQuery.data;
+    const isUnderReview = submission?.status === 'submitted' || submission?.status === 'screening';
+
+    if (isUnderReview) {
+      setVisibility(planQuery.data.visibility === 'private' ? 'private' : 'public');
+    }
+  }, [latestSubmissionQuery.data, planQuery.data]);
+
+  if (planQuery.isLoading || latestSubmissionQuery.isLoading || sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner size="lg" />
@@ -71,6 +92,17 @@ export default function EditPlanPage() {
     );
   }
 
+  const currentVisibility: 'public' | 'private' =
+    planQuery.data.visibility === 'private' ? 'private' : 'public';
+  const latestSubmission = latestSubmissionQuery.data ?? null;
+  const hasActiveSubmission =
+    latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const hasVisibilityChange = visibility !== currentVisibility;
+  const isPublishedPrivatePlan =
+    planQuery.data.status === 'published' && currentVisibility === 'private';
+  const isRequestingPublicReview =
+    !hasActiveSubmission && isPublishedPrivatePlan && visibility === 'public';
+
   const handleSave = async () => {
     if (title.length > TITLE_MAX) {
       alert(`Title must be ${TITLE_MAX} characters or fewer.`);
@@ -80,6 +112,25 @@ export default function EditPlanPage() {
     if (description.length > DESCRIPTION_MAX) {
       alert(`Description must be ${DESCRIPTION_MAX} characters or fewer.`);
       return;
+    }
+
+    if (hasActiveSubmission && hasVisibilityChange) {
+      alert('Visibility cannot be changed while this plan is under review.');
+      setVisibility(currentVisibility);
+      return;
+    }
+
+    if (hasVisibilityChange) {
+      const confirmed = window.confirm(
+        isRequestingPublicReview
+          ? 'Changing this published private plan to public will submit it for screening. The plan will stay private unless the review passes. Continue?'
+          : 'Changing visibility can affect who can access this plan. Continue?',
+      );
+
+      if (!confirmed) {
+        setVisibility(currentVisibility);
+        return;
+      }
     }
 
     let coverUrl = planQuery.data?.cover_image || undefined;
@@ -99,15 +150,38 @@ export default function EditPlanPage() {
         id: planId as string,
         title,
         description,
-        visibility,
+        visibility: isRequestingPublicReview ? 'private' : visibility,
         cover_image: coverUrl,
         tags: selectedTags.length ? selectedTags : null,
       },
       {
-        onSuccess: () => router.push('/plans/my'),
+        onSuccess: () => {
+          if (!isRequestingPublicReview) {
+            router.push('/plans/my');
+            return;
+          }
+
+          submitPublicVisibilityReview.mutate(undefined, {
+            onSuccess: (submission) => {
+              alert(
+                submission
+                  ? `Public visibility submitted for screening. Submission #${submission.submission_number} is now in review.`
+                  : 'Public visibility submitted for screening.',
+              );
+              router.push(`/plans/${planId as string}/days`);
+            },
+            onError: (error) => {
+              console.error(error);
+              alert(error.message || 'Could not submit this plan for screening.');
+              setVisibility(currentVisibility);
+            },
+          });
+        },
       },
     );
   };
+
+  const isSaving = updatePlan.isPending || uploadingImage || submitPublicVisibilityReview.isPending;
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6 rounded-2xl shadow-sm border border-gray-200 mb-20">
@@ -142,25 +216,39 @@ export default function EditPlanPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() => setVisibility('public')}
+            disabled={hasActiveSubmission}
+            onClick={() => {
+              if (!hasActiveSubmission) {
+                setVisibility('public');
+              }
+            }}
             className={`rounded-2xl border p-4 text-left transition ${
               visibility === 'public'
                 ? 'border-indigo-600 bg-indigo-50 text-indigo-900'
                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-            }`}>
+            } ${hasActiveSubmission ? 'cursor-not-allowed opacity-60' : ''}`}>
             <p className="font-semibold">Public plan</p>
             <p className="mt-2 text-sm leading-6 text-current/80">
-              Discoverable after screening. Readers can find it in plan lists and search.
+              {hasActiveSubmission
+                ? 'Visibility is locked while this plan is under review.'
+                : isPublishedPrivatePlan
+                  ? 'Requires screening before it appears in plan lists and search.'
+                  : 'Discoverable after screening. Readers can find it in plan lists and search.'}
             </p>
           </button>
           <button
             type="button"
-            onClick={() => setVisibility('private')}
+            disabled={hasActiveSubmission}
+            onClick={() => {
+              if (!hasActiveSubmission) {
+                setVisibility('private');
+              }
+            }}
             className={`rounded-2xl border p-4 text-left transition ${
               visibility === 'private'
                 ? 'border-amber-500 bg-amber-50 text-amber-950'
                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-            }`}>
+            } ${hasActiveSubmission ? 'cursor-not-allowed opacity-60' : ''}`}>
             <p className="font-semibold">Private plan</p>
             <p className="mt-2 text-sm leading-6 text-current/80">
               Hidden from discovery. Only people you manually share it with can join.
@@ -168,7 +256,11 @@ export default function EditPlanPage() {
           </button>
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          Changes apply the next time this plan passes screening.
+          {hasActiveSubmission
+            ? `Submission #${latestSubmission?.submission_number} is under review. Visibility can be changed after it finishes.`
+            : isRequestingPublicReview
+              ? 'This plan will stay private while public visibility is screened.'
+              : 'Changes apply the next time this plan passes screening.'}
         </p>
       </div>
 
@@ -228,9 +320,15 @@ export default function EditPlanPage() {
 
       <button
         onClick={handleSave}
-        disabled={updatePlan.isPending || uploadingImage}
+        disabled={isSaving}
         className="px-6 py-3 rounded-lg bg-indigo-600 text-white">
-        {updatePlan.isPending ? 'Saving…' : 'Save Changes'}
+        {isSaving
+          ? submitPublicVisibilityReview.isPending
+            ? 'Submitting...'
+            : 'Saving...'
+          : isRequestingPublicReview
+            ? 'Save & Submit Review'
+            : 'Save Changes'}
       </button>
     </div>
   );

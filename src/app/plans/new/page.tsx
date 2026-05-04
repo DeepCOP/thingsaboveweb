@@ -194,7 +194,8 @@ export default function CreatePlanPage() {
             </button>
           </div>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            You can change this later from the edit page.
+            You can change this later from the edit page. Published private plans require another
+            screening pass before they can become public.
           </p>
         </div>
 
