@@ -98,10 +98,12 @@ export default function EditPlanPage() {
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
   const hasVisibilityChange = visibility !== currentVisibility;
-  const isPublishedPrivatePlan =
-    planQuery.data.status === 'published' && currentVisibility === 'private';
-  const isRequestingPublicReview =
-    !hasActiveSubmission && isPublishedPrivatePlan && visibility === 'public';
+  const isPublishedPlan = planQuery.data.status === 'published';
+  const requiresVisibilityScreening =
+    !hasActiveSubmission &&
+    isPublishedPlan &&
+    currentVisibility === 'private' &&
+    visibility === 'public';
 
   const handleSave = async () => {
     if (title.length > TITLE_MAX) {
@@ -122,7 +124,7 @@ export default function EditPlanPage() {
 
     if (hasVisibilityChange) {
       const confirmed = window.confirm(
-        isRequestingPublicReview
+        requiresVisibilityScreening
           ? 'Changing this published private plan to public will submit it for screening. The plan will stay private unless the review passes. Continue?'
           : 'Changing visibility can affect who can access this plan. Continue?',
       );
@@ -150,13 +152,13 @@ export default function EditPlanPage() {
         id: planId as string,
         title,
         description,
-        visibility: isRequestingPublicReview ? 'private' : visibility,
+        visibility: requiresVisibilityScreening ? 'private' : visibility,
         cover_image: coverUrl,
         tags: selectedTags.length ? selectedTags : null,
       },
       {
         onSuccess: () => {
-          if (!isRequestingPublicReview) {
+          if (!requiresVisibilityScreening) {
             router.push('/plans/my');
             return;
           }
@@ -231,7 +233,7 @@ export default function EditPlanPage() {
             <p className="mt-2 text-sm leading-6 text-current/80">
               {hasActiveSubmission
                 ? 'Visibility is locked while this plan is under review.'
-                : isPublishedPrivatePlan
+                : requiresVisibilityScreening
                   ? 'Requires screening before it appears in plan lists and search.'
                   : 'Discoverable after screening. Readers can find it in plan lists and search.'}
             </p>
@@ -258,7 +260,7 @@ export default function EditPlanPage() {
         <p className="mt-2 text-sm text-gray-500">
           {hasActiveSubmission
             ? `Submission #${latestSubmission?.submission_number} is under review. Visibility can be changed after it finishes.`
-            : isRequestingPublicReview
+            : requiresVisibilityScreening
               ? 'This plan will stay private while public visibility is screened.'
               : 'Changes apply the next time this plan passes screening.'}
         </p>
@@ -326,7 +328,7 @@ export default function EditPlanPage() {
           ? submitPublicVisibilityReview.isPending
             ? 'Submitting...'
             : 'Saving...'
-          : isRequestingPublicReview
+          : requiresVisibilityScreening
             ? 'Save & Submit Review'
             : 'Save Changes'}
       </button>
