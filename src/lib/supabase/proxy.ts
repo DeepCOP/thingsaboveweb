@@ -48,6 +48,8 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublicRoute =
     pathname === '/' ||
+    pathname === '/download' ||
+    pathname.startsWith('/download/') ||
     pathname === '/terms' ||
     pathname.startsWith('/terms/') ||
     pathname === '/statement-of-faith' ||

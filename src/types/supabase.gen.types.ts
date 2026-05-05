@@ -580,6 +580,7 @@ export type Database = {
           title: string;
           total_days: number;
           updated_at: string | null;
+          visibility: string;
         };
         Insert: {
           author_id?: string | null;
@@ -593,6 +594,7 @@ export type Database = {
           title: string;
           total_days?: number;
           updated_at?: string | null;
+          visibility?: string;
         };
         Update: {
           author_id?: string | null;
@@ -606,6 +608,7 @@ export type Database = {
           title?: string;
           total_days?: number;
           updated_at?: string | null;
+          visibility?: string;
         };
         Relationships: [];
       };
@@ -1115,6 +1118,7 @@ export type Database = {
           submitted_tags: string[];
           submitted_title: string;
           submitted_total_days: number;
+          submitted_visibility: string;
           updated_at: string;
         };
         Insert: {
@@ -1140,6 +1144,7 @@ export type Database = {
           submitted_tags?: string[];
           submitted_title: string;
           submitted_total_days: number;
+          submitted_visibility?: string;
           updated_at?: string;
         };
         Update: {
@@ -1165,6 +1170,7 @@ export type Database = {
           submitted_tags?: string[];
           submitted_title?: string;
           submitted_total_days?: number;
+          submitted_visibility?: string;
           updated_at?: string;
         };
         Relationships: [
@@ -1750,6 +1756,7 @@ export type Database = {
           total_days: number | null;
           updated_at: string | null;
           user_reaction: string | null;
+          visibility: string | null;
         };
         Insert: {
           author_id?: string | null;
@@ -1767,6 +1774,7 @@ export type Database = {
           total_days?: number | null;
           updated_at?: string | null;
           user_reaction?: never;
+          visibility?: string | null;
         };
         Update: {
           author_id?: string | null;
@@ -1784,6 +1792,7 @@ export type Database = {
           total_days?: number | null;
           updated_at?: string | null;
           user_reaction?: never;
+          visibility?: string | null;
         };
         Relationships: [];
       };
@@ -2116,6 +2125,7 @@ export type Database = {
           status: string;
           title: string;
           total_days: number;
+          visibility: string;
         }[];
       };
       get_my_notifications: {
@@ -2467,7 +2477,7 @@ export type Database = {
         };
       };
       submit_devotional_plan_for_screening: {
-        Args: { p_plan_id: string };
+        Args: { p_plan_id: string; p_visibility?: string };
         Returns: {
           plan_id: string;
           status: string;

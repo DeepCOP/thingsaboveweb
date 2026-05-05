@@ -19,6 +19,8 @@ export default function PlanCard({
   onDelete: UseMutateFunction<void, Error, string, unknown>;
 }) {
   const router = useRouter();
+  const reportCount = reports.filter((report) => report.plan_id === plan.id).length;
+  const visibilityLabel = plan.visibility === 'private' ? 'Private' : 'Public';
   const handleDelete = () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${plan.title}"?\nThis action cannot be undone.`,
@@ -45,12 +47,22 @@ export default function PlanCard({
       )}
 
       <div className="p-5 space-y-3">
-        <h3 className="font-semibold text-lg">{plan.title}</h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-lg font-semibold">{plan.title}</h3>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+              plan.visibility === 'private'
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-emerald-100 text-emerald-800'
+            }`}>
+            {visibilityLabel}
+          </span>
+        </div>
 
         <p className="text-sm text-gray-500 line-clamp-2">{plan.description}</p>
 
         {/* ✅ Stats */}
-        <PlanStatsCard helpfulCount={plan.helpful_count} reports={reports.length} />
+        <PlanStatsCard helpfulCount={plan.helpful_count} reports={reportCount} />
 
         <div className="flex items-center justify-between pt-3">
           <span className="text-sm text-gray-400">{plan.total_days} days</span>

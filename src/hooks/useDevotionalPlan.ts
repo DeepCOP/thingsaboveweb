@@ -7,7 +7,13 @@ import {
   fetchPlanTags,
 } from '../api/queries';
 import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
-import { createDevotionalPlan, deleteDevotionalPlan, updateDevotionalPlan } from '../api/mutations';
+import {
+  createDevotionalPlan,
+  deleteDevotionalPlan,
+  publishSubmittedDevotionalPlan,
+  submitPlanForScreening,
+  updateDevotionalPlan,
+} from '../api/mutations';
 import { DevotionalDayInput } from '@/src/types/types';
 import { submitDevotionalPlanForScreening } from '../api/mutations';
 
@@ -94,12 +100,65 @@ export function useDeleteDevotionalPlan() {
   });
 }
 
-export function useSubmitDevotionalPlanForScreening(planId: string, userId: string | undefined) {
+export function useSubmitDevotionalPlanForScreening(
+  planId: string,
+  userId: string | undefined,
+  visibility?: 'public' | 'private',
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (days: DevotionalDayInput[]) => submitDevotionalPlanForScreening(planId, days),
+    mutationFn: (days: DevotionalDayInput[]) =>
+      submitDevotionalPlanForScreening(planId, days, visibility),
 
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-plan', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-drafts', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-days', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['my-devotional-plans', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plan-submission', planId, userId],
+      });
+    },
+  });
+}
+
+export function useSubmitPlanForScreening(
+  planId: string,
+  userId: string | undefined,
+  visibility?: 'public' | 'private',
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => submitPlanForScreening(planId, visibility),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-plan', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['my-devotional-plans', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plan-submission', planId, userId],
+      });
+    },
+  });
+}
+
+export function usePublishSubmittedDevotionalPlan(planId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (submissionId: string) => publishSubmittedDevotionalPlan(submissionId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['devotional-plan', planId, userId],

@@ -22,6 +22,7 @@ import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDev
 import {
   useGetDevotionalById,
   useLatestPlanSubmission,
+  usePublishSubmittedDevotionalPlan,
   useSubmitDevotionalPlanForScreening,
 } from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
@@ -50,11 +51,15 @@ export default function PlanDaysPage() {
   const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
   const { session, loading: sessionLoading } = useAuth();
+  const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
+  const planVisibility: 'public' | 'private' =
+    planQuery.data?.visibility === 'private' ? 'private' : 'public';
   const submitDevotionals = useSubmitDevotionalPlanForScreening(
     planId as string,
     session?.user?.id,
+    planVisibility,
   );
-  const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
+  const publishSubmission = usePublishSubmittedDevotionalPlan(planId as string, session?.user?.id);
   const latestSubmissionQuery = useLatestPlanSubmission(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
   const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);
@@ -75,9 +80,12 @@ export default function PlanDaysPage() {
   const latestSubmission = latestSubmissionQuery.data ?? null;
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const hasApprovedSubmission = latestSubmission?.status === 'approved';
+  const isPrivatePlan = planVisibility === 'private';
 
   const isLoading =
     submitDevotionals.isPending ||
+    publishSubmission.isPending ||
     saveDraft.isPending ||
     draftsQuery.isLoading ||
     planQuery.isLoading ||
@@ -154,7 +162,9 @@ export default function PlanDaysPage() {
       return;
     }
     const confirmed = window.confirm(
-      'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
+      isPrivatePlan
+        ? 'Ready to submit this private plan for screening? The current draft will be frozen for review. If it passes, you can publish it privately for invited readers.'
+        : 'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, you can publish it when you are ready.',
     );
     if (!confirmed) {
       return;
@@ -165,8 +175,12 @@ export default function PlanDaysPage() {
         latestSubmissionQuery.refetch();
         alert(
           submission
-            ? `Plan submitted for screening. Submission #${submission.submission_number} is now in review.`
-            : 'Plan submitted for screening.',
+            ? isPrivatePlan
+              ? `Private plan submitted for screening. Submission #${submission.submission_number} is now in review.`
+              : `Plan submitted for screening. Submission #${submission.submission_number} is now in review.`
+            : isPrivatePlan
+              ? 'Private plan submitted for screening.'
+              : 'Plan submitted for screening.',
         );
       },
       onError: (error) => {
@@ -180,10 +194,38 @@ export default function PlanDaysPage() {
     if (submitDevotionals.isPending) return 'Submitting...';
     if (hasActiveSubmission)
       return latestSubmission?.status === 'screening' ? 'Under Review' : 'Queued for Review';
+    if (hasApprovedSubmission) return 'Submit New Review';
     if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
     if (latestSubmission?.status === 'failed') return 'Retry Submission';
     if (planQuery.data?.status === 'published') return 'Submit Updated Version';
-    return 'Submit for Review & Publish';
+    return 'Submit for Review';
+  }
+
+  function publishApprovedSubmission() {
+    if (!latestSubmission || latestSubmission.status !== 'approved') {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      isPrivatePlan
+        ? 'Publish this approved private plan now? Invited readers will be able to access this version.'
+        : 'Publish this approved plan now? Readers will be able to find it in public discovery.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    publishSubmission.mutate(latestSubmission.id, {
+      onSuccess: () => {
+        latestSubmissionQuery.refetch();
+        alert('Plan published.');
+      },
+      onError: (error) => {
+        console.error(error);
+        alert(error.message || 'Could not publish this plan.');
+      },
+    });
   }
 
   useEffect(() => {
@@ -197,7 +239,7 @@ export default function PlanDaysPage() {
             day_number: day.day_number,
             content: day.content,
             scriptures: day.scriptures ?? [],
-            title: day.title,
+            title: day.title ?? '',
           })),
         );
 
@@ -220,7 +262,7 @@ export default function PlanDaysPage() {
         day_number: day.day_number,
         content: day.content,
         scriptures: day.scriptures ?? [],
-        title: day.title,
+        title: day.title ?? '',
       })),
     );
     initializedRef.current = true;
@@ -258,16 +300,25 @@ export default function PlanDaysPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
             {planQuery.data ? planQuery.data.title : 'Write Your Devotional'}
           </h1>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+              isPrivatePlan ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+            }`}>
+            {isPrivatePlan ? 'Private' : 'Public'}
+          </span>
         </div>
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
-          Add content and scripture for each day, then submit the draft for screening.
+          {isPrivatePlan
+            ? 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it privately for invited readers.'
+            : 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it to plan lists and search.'}
         </p>
       </div>
 
       <SubmissionStatusCard
         latestSubmission={latestSubmission}
         isPublished={planQuery.data?.status === 'published'}
+        visibility={planVisibility}
       />
 
       {planQuery.isLoading || draftsQuery.isLoading || devotionalDays.isLoading ? (
@@ -301,13 +352,13 @@ export default function PlanDaysPage() {
                   <input
                     type="text"
                     placeholder="Day title (optional)"
-                    value={day.title}
+                    value={day.title ?? ''}
                     maxLength={DAY_TITLE_MAX}
                     onChange={(e) => updateDay(index, { title: e.target.value })}
                     className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <p className="text-xs text-gray-500">
-                    {day.title.length}/{DAY_TITLE_MAX}
+                    {(day.title ?? '').length}/{DAY_TITLE_MAX}
                   </p>
 
                   <RichTextEditor
@@ -338,7 +389,7 @@ export default function PlanDaysPage() {
           <Link href="/statement-of-faith" className="underline underline-offset-4">
             Statement of Faith
           </Link>{' '}
-          before making this plan public.
+          before publishing or sharing this plan.
         </p>
         <div className="mt-4 flex items-start gap-3">
           <Checkbox
@@ -364,7 +415,7 @@ export default function PlanDaysPage() {
         )}
       </div>
 
-      <div className="flex justify-between pt-6">
+      <div className="flex flex-wrap justify-between gap-3 pt-6">
         <button
           onClick={() => setDays((prev) => [...prev, createEmptyDay(prev.length + 1)])}
           className="rounded-full border px-6 py-3">
@@ -377,6 +428,15 @@ export default function PlanDaysPage() {
           className="rounded-full bg-indigo-600 px-8 py-3 text-white">
           {getSubmitButtonLabel()}
         </button>
+
+        {hasApprovedSubmission && (
+          <button
+            onClick={publishApprovedSubmission}
+            disabled={isLoading}
+            className="rounded-full bg-emerald-600 px-8 py-3 text-white">
+            {publishSubmission.isPending ? 'Publishing...' : 'Publish Approved Plan'}
+          </button>
+        )}
 
         <button
           onClick={() =>
@@ -401,20 +461,24 @@ export default function PlanDaysPage() {
 function SubmissionStatusCard({
   latestSubmission,
   isPublished,
+  visibility,
 }: {
   latestSubmission: PlanSubmission | null;
   isPublished: boolean;
+  visibility: 'public' | 'private';
 }) {
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const isPrivatePlan = visibility === 'private';
 
   if (!latestSubmission) {
     return isPublished ? (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
         <p className="font-semibold">This plan is live</p>
         <p className="mt-2 leading-6">
-          The current published version is visible to readers now. Keep editing here, then submit an
-          updated draft whenever you&apos;re ready for another screening pass.
+          {isPrivatePlan
+            ? 'The current approved version is live in private mode. Keep editing here, then submit an updated draft whenever you are ready for another screening pass.'
+            : 'The current published version is visible to readers now. Keep editing here, then submit an updated draft whenever you are ready for another screening pass.'}
         </p>
       </div>
     ) : null;
@@ -444,9 +508,9 @@ function SubmissionStatusCard({
           {latestSubmission.screening_summary ||
             'This draft did not pass screening. Update the content and submit again.'}
         </p>
-        {latestSubmission.screening_reason_codes.length > 0 && (
+        {(latestSubmission.screening_reason_codes ?? []).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {latestSubmission.screening_reason_codes.map((reasonCode) => (
+            {(latestSubmission.screening_reason_codes ?? []).map((reasonCode) => (
               <span
                 key={reasonCode}
                 className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700">
@@ -471,12 +535,28 @@ function SubmissionStatusCard({
     );
   }
 
+  if (latestSubmission.status === 'approved') {
+    return (
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+        <p className="font-semibold">
+          Submission #{latestSubmission.submission_number} is approved
+        </p>
+        <p className="mt-2 leading-6">
+          {isPrivatePlan
+            ? 'This version passed screening and is ready to publish in private mode. People can only access it when you share it with them manually.'
+            : 'This version passed screening and is ready to publish. Publish it when you are ready for readers to see it.'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
       <p className="font-semibold">Submission #{latestSubmission.submission_number} published</p>
       <p className="mt-2 leading-6">
-        This version passed screening and is now live. Keep editing here if you want to prepare an
-        updated submission.
+        {isPrivatePlan
+          ? 'This version passed screening and is now live in private mode. People can only access it when you share it with them manually.'
+          : 'This version passed screening and is now live. Keep editing here if you want to prepare an updated submission.'}
       </p>
     </div>
   );
