@@ -73,7 +73,7 @@ export type PlanSubmission = {
   id: string;
   plan_id: string;
   submission_number: number;
-  status: 'submitted' | 'screening' | 'published' | 'rejected' | 'failed';
+  status: 'submitted' | 'screening' | 'approved' | 'published' | 'rejected' | 'failed';
   screening_decision: 'pass' | 'reject' | 'error' | null;
   screening_summary: string | null;
   screening_reason_codes: string[];

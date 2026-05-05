@@ -22,6 +22,7 @@ import { useGetDevotionalDays, useGetDevotionalDrafts } from '@/src/hooks/useDev
 import {
   useGetDevotionalById,
   useLatestPlanSubmission,
+  usePublishSubmittedDevotionalPlan,
   useSubmitDevotionalPlanForScreening,
 } from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
@@ -58,6 +59,7 @@ export default function PlanDaysPage() {
     session?.user?.id,
     planVisibility,
   );
+  const publishSubmission = usePublishSubmittedDevotionalPlan(planId as string, session?.user?.id);
   const latestSubmissionQuery = useLatestPlanSubmission(planId as string, session?.user?.id);
   const saveDraft = useSaveDevotionalDraft(planId as string);
   const devotionalDays = useGetDevotionalDays(planId as string, session?.user?.id);
@@ -78,10 +80,12 @@ export default function PlanDaysPage() {
   const latestSubmission = latestSubmissionQuery.data ?? null;
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
+  const hasApprovedSubmission = latestSubmission?.status === 'approved';
   const isPrivatePlan = planVisibility === 'private';
 
   const isLoading =
     submitDevotionals.isPending ||
+    publishSubmission.isPending ||
     saveDraft.isPending ||
     draftsQuery.isLoading ||
     planQuery.isLoading ||
@@ -159,8 +163,8 @@ export default function PlanDaysPage() {
     }
     const confirmed = window.confirm(
       isPrivatePlan
-        ? 'Ready to submit this private plan for screening? The current draft will be frozen for review. If it passes, it will stay private and only people you manually invite can join.'
-        : 'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, it will publish automatically.',
+        ? 'Ready to submit this private plan for screening? The current draft will be frozen for review. If it passes, you can publish it privately for invited readers.'
+        : 'Ready to submit this plan for screening? The current draft will be frozen for review. If it passes, you can publish it when you are ready.',
     );
     if (!confirmed) {
       return;
@@ -190,10 +194,38 @@ export default function PlanDaysPage() {
     if (submitDevotionals.isPending) return 'Submitting...';
     if (hasActiveSubmission)
       return latestSubmission?.status === 'screening' ? 'Under Review' : 'Queued for Review';
+    if (hasApprovedSubmission) return 'Submit New Review';
     if (latestSubmission?.status === 'rejected') return 'Resubmit for Review';
     if (latestSubmission?.status === 'failed') return 'Retry Submission';
     if (planQuery.data?.status === 'published') return 'Submit Updated Version';
-    return isPrivatePlan ? 'Submit for Review' : 'Submit for Review & Publish';
+    return 'Submit for Review';
+  }
+
+  function publishApprovedSubmission() {
+    if (!latestSubmission || latestSubmission.status !== 'approved') {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      isPrivatePlan
+        ? 'Publish this approved private plan now? Invited readers will be able to access this version.'
+        : 'Publish this approved plan now? Readers will be able to find it in public discovery.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    publishSubmission.mutate(latestSubmission.id, {
+      onSuccess: () => {
+        latestSubmissionQuery.refetch();
+        alert('Plan published.');
+      },
+      onError: (error) => {
+        console.error(error);
+        alert(error.message || 'Could not publish this plan.');
+      },
+    });
   }
 
   useEffect(() => {
@@ -278,8 +310,8 @@ export default function PlanDaysPage() {
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
           {isPrivatePlan
-            ? 'Add content and scripture for each day, then submit the draft for screening. Approved private plans stay hidden from discovery and can be shared manually.'
-            : 'Add content and scripture for each day, then submit the draft for screening. Approved public plans become discoverable in plan lists and search.'}
+            ? 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it privately for invited readers.'
+            : 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it to plan lists and search.'}
         </p>
       </div>
 
@@ -383,7 +415,7 @@ export default function PlanDaysPage() {
         )}
       </div>
 
-      <div className="flex justify-between pt-6">
+      <div className="flex flex-wrap justify-between gap-3 pt-6">
         <button
           onClick={() => setDays((prev) => [...prev, createEmptyDay(prev.length + 1)])}
           className="rounded-full border px-6 py-3">
@@ -396,6 +428,15 @@ export default function PlanDaysPage() {
           className="rounded-full bg-indigo-600 px-8 py-3 text-white">
           {getSubmitButtonLabel()}
         </button>
+
+        {hasApprovedSubmission && (
+          <button
+            onClick={publishApprovedSubmission}
+            disabled={isLoading}
+            className="rounded-full bg-emerald-600 px-8 py-3 text-white">
+            {publishSubmission.isPending ? 'Publishing...' : 'Publish Approved Plan'}
+          </button>
+        )}
 
         <button
           onClick={() =>
@@ -489,6 +530,21 @@ function SubmissionStatusCard({
         <p className="mt-2 leading-6">
           {latestSubmission.screening_summary ||
             'Something interrupted screening before it could finish. You can submit again.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (latestSubmission.status === 'approved') {
+    return (
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+        <p className="font-semibold">
+          Submission #{latestSubmission.submission_number} is approved
+        </p>
+        <p className="mt-2 leading-6">
+          {isPrivatePlan
+            ? 'This version passed screening and is ready to publish in private mode. People can only access it when you share it with them manually.'
+            : 'This version passed screening and is ready to publish. Publish it when you are ready for readers to see it.'}
         </p>
       </div>
     );

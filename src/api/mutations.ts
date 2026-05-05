@@ -25,6 +25,14 @@ export async function submitPlanForScreening(planId: string, visibility?: 'publi
   return data?.[0] ?? null;
 }
 
+export async function publishSubmittedDevotionalPlan(submissionId: string) {
+  const { error } = await supabase.rpc('publish_submitted_devotional_plan', {
+    p_submission_id: submissionId,
+  });
+
+  if (error) throw error;
+}
+
 export async function createDevotionalPlan(payload: DevotionalPlanInsert) {
   const { error } = await supabase.from('devotional_plans').insert({
     id: payload.id,

@@ -10,6 +10,7 @@ import { DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import {
   createDevotionalPlan,
   deleteDevotionalPlan,
+  publishSubmittedDevotionalPlan,
   submitPlanForScreening,
   updateDevotionalPlan,
 } from '../api/mutations';
@@ -142,6 +143,31 @@ export function useSubmitPlanForScreening(
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['devotional-plan', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['my-devotional-plans', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plan-submission', planId, userId],
+      });
+    },
+  });
+}
+
+export function usePublishSubmittedDevotionalPlan(planId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (submissionId: string) => publishSubmittedDevotionalPlan(submissionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-plan', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-drafts', planId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['devotional-days', planId, userId],
       });
       queryClient.invalidateQueries({
         queryKey: ['my-devotional-plans', userId],
