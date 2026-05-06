@@ -6,7 +6,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useCreateDevotionalPlan, usePlanTags } from '@/src/hooks/useDevotionalPlan';
-import { uploadPlanCover } from '@/src/lib/utils';
+import {
+  MAX_PLAN_COVER_IMAGE_MB,
+  isPlanCoverImageTooLarge,
+  uploadPlanCover,
+} from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
 
 export default function CreatePlanPage() {
@@ -63,6 +67,11 @@ export default function CreatePlanPage() {
     const planId = crypto.randomUUID();
 
     if (coverFile) {
+      if (isPlanCoverImageTooLarge(coverFile)) {
+        alert(`Cover image must be ${MAX_PLAN_COVER_IMAGE_MB} MB or smaller.`);
+        return;
+      }
+
       setUploadingImage(true);
       coverImageUrl = await uploadPlanCover({
         file: coverFile,
@@ -202,11 +211,23 @@ export default function CreatePlanPage() {
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
+
+              if (isPlanCoverImageTooLarge(file)) {
+                alert(`Cover image must be ${MAX_PLAN_COVER_IMAGE_MB} MB or smaller.`);
+                e.currentTarget.value = '';
+                setCoverFile(null);
+                setCoverPreview(null);
+                return;
+              }
+
               setCoverFile(file);
               setCoverPreview(URL.createObjectURL(file));
             }}
             className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-indigo-600 hover:file:bg-indigo-100"
           />
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
+            Maximum file size: {MAX_PLAN_COVER_IMAGE_MB} MB.
+          </p>
 
           {coverPreview && (
             <div className="mt-4">

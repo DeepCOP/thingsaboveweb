@@ -8,7 +8,11 @@ import {
   useGetDevotionalById,
   useUpdateDevotionalPlan,
 } from '@/src/hooks/useDevotionalPlan';
-import { uploadPlanCover } from '@/src/lib/utils';
+import {
+  MAX_PLAN_COVER_IMAGE_MB,
+  isPlanCoverImageTooLarge,
+  uploadPlanCover,
+} from '@/src/lib/utils';
 import Spinner from '@/src/components/ui/Spinner';
 import Image from 'next/image';
 
@@ -83,6 +87,11 @@ export default function EditPlanPage() {
     let coverUrl = planQuery.data?.cover_image || undefined;
 
     if (coverFile && session) {
+      if (isPlanCoverImageTooLarge(coverFile)) {
+        alert(`Cover image must be ${MAX_PLAN_COVER_IMAGE_MB} MB or smaller.`);
+        return;
+      }
+
       setUploadingImage(true);
       coverUrl = await uploadPlanCover({
         file: coverFile,
@@ -182,10 +191,22 @@ export default function EditPlanPage() {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
+
+            if (isPlanCoverImageTooLarge(file)) {
+              alert(`Cover image must be ${MAX_PLAN_COVER_IMAGE_MB} MB or smaller.`);
+              e.currentTarget.value = '';
+              setCoverFile(null);
+              setPreview(planQuery.data?.cover_image ?? null);
+              return;
+            }
+
             setCoverFile(file);
             setPreview(URL.createObjectURL(file));
           }}
         />
+        <p className="mt-2 text-xs text-gray-500">
+          Maximum file size: {MAX_PLAN_COVER_IMAGE_MB} MB.
+        </p>
       </div>
 
       <button
