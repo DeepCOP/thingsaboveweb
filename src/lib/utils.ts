@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const MAX_PLAN_COVER_IMAGE_MB = 5;
+export const MAX_PLAN_COVER_IMAGE_MB = 1;
 export const MAX_PLAN_COVER_IMAGE_BYTES = MAX_PLAN_COVER_IMAGE_MB * 1024 * 1024;
 
 export function isPlanCoverImageTooLarge(file: File) {
