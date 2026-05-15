@@ -1,11 +1,23 @@
 import { DevotionalDayInput, DevotionalPlanInsert, DevotionalPlanUpdate } from '@/src/types/types';
 import supabase from '../lib/supabaseClient';
 
+function hasScriptureReferences(day: Pick<DevotionalDayInput, 'scriptures'>) {
+  return day.scriptures.some((reference) => reference.trim().length > 0);
+}
+
 export async function submitDevotionalPlanForScreening(
   planId: string,
   days: DevotionalDayInput[],
   visibility?: 'public' | 'private',
 ) {
+  const firstDayMissingScriptureReferences = days.find((day) => !hasScriptureReferences(day));
+
+  if (firstDayMissingScriptureReferences) {
+    throw new Error(
+      `Day ${firstDayMissingScriptureReferences.day_number} needs at least 1 scripture reference before publishing.`,
+    );
+  }
+
   await saveDevotionalDraft(days, planId);
   return submitPlanForScreening(planId, visibility);
 }
