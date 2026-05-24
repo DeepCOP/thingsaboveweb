@@ -2,6 +2,10 @@ type LegalSection = {
   title: string;
   paragraphs: string[];
   bullets?: string[];
+  link?: {
+    text: string;
+    href: string;
+  };
 };
 
 type LegalDocumentLayoutProps = {
@@ -53,6 +57,15 @@ export default function LegalDocumentLayout({
                       </li>
                     ))}
                   </ul>
+                )}
+                {section.link && (
+                  <p className="mt-4">
+                    <a
+                      href={section.link.href}
+                      className="font-medium text-emerald-700 underline underline-offset-4 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300">
+                      {section.link.text}
+                    </a>
+                  </p>
                 )}
               </div>
             </section>

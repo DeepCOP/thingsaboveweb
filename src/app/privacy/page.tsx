@@ -76,6 +76,16 @@ const sections = [
       'Your continued use of ThingsAfter after updated Privacy Policy becomes effective constitutes acceptance of the revised policy.',
     ],
   },
+  {
+    title: 'Contact',
+    paragraphs: [
+      'If you have questions, concerns, or requests regarding this Privacy Policy or your personal information, you may contact us at:',
+    ],
+    link: {
+      text: 'Use our Account Deletion Request form to request full or partial deletion of your account and data.',
+      href: '/account/deletion-request',
+    },
+  },
 ];
 
 export default function PrivacyPage() {

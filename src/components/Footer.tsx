@@ -95,9 +95,16 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/auth/sign-up"
+                  href="/privacy"
                   className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400">
-                  Create Account
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/account/deletion-request"
+                  className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400">
+                  Delete My Account
                 </Link>
               </li>
             </ul>
