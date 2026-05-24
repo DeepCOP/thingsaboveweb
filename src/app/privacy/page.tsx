@@ -76,16 +76,6 @@ const sections = [
       'Your continued use of ThingsAfter after updated Privacy Policy becomes effective constitutes acceptance of the revised policy.',
     ],
   },
-  {
-    title: 'Contact',
-    paragraphs: [
-      'If you have questions, concerns, or requests regarding this Privacy Policy or your personal information, you may contact us at:',
-    ],
-    bullets: [
-      'Email: privacy@thingsabove.life',
-      'ThingsAbove c/o Deep COP Studios',
-    ],
-  },
 ];
 
 export default function PrivacyPage() {
