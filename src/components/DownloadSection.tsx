@@ -1,30 +1,112 @@
-import { ArrowUpRight, Download, FlaskConical, Smartphone } from 'lucide-react';
+import { Apple, ArrowUpRight, Download, FlaskConical, Smartphone } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
+import { isBetaSite } from '@/src/lib/site-channel';
 
 const iosBetaUrl = process.env.NEXT_PUBLIC_IOS_TESTFLIGHT_URL;
 const androidBetaUrl = process.env.NEXT_PUBLIC_ANDROID_BETA_URL;
+const iosAppStoreUrl = process.env.NEXT_PUBLIC_IOS_APP_STORE_URL;
+const androidPlayStoreUrl = process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL;
 
-const downloadOptions = [
-  {
-    title: 'iPhone & iPad',
-    channel: 'TestFlight beta',
-    description: 'Get the latest approved iOS beta',
-    href: iosBetaUrl,
-    cta: 'Join on TestFlight',
-    icon: Smartphone,
-    accent: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-200',
-  },
-  {
-    title: 'Android',
-    channel: 'GitHub beta',
-    description: 'Install the latest Android beta from GitHub Releases',
-    href: androidBetaUrl,
-    cta: 'Download Android beta',
-    icon: Download,
-    accent: 'bg-amber-500/12 text-amber-700 dark:text-amber-200',
-  },
-];
+type StoreBadge = {
+  src: string;
+  alt: string;
+};
+
+type DownloadOption = {
+  title: string;
+  channel: string;
+  description: string;
+  href: string | undefined;
+  cta: string;
+  icon: LucideIcon;
+  accent: string;
+  storeBadge?: StoreBadge;
+};
+
+type DownloadContent = {
+  badge: string;
+  BadgeIcon: LucideIcon;
+  title: string;
+  description: string;
+  options: DownloadOption[];
+};
+
+const storeBadgeClassName =
+  'inline-flex w-full max-w-[15rem] transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950';
+
+const downloadContent: DownloadContent = isBetaSite
+  ? {
+      badge: 'Mobile beta',
+      BadgeIcon: FlaskConical,
+      title: 'Download the latest beta',
+      description:
+        'Take Things Above with you each day. Join the iOS beta through TestFlight or grab the latest Android beta build.',
+      options: [
+        {
+          title: 'iPhone & iPad',
+          channel: 'TestFlight beta',
+          description: 'Get the latest approved iOS beta',
+          href: iosBetaUrl,
+          cta: 'Join on TestFlight',
+          icon: Smartphone,
+          accent: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-200',
+        },
+        {
+          title: 'Android',
+          channel: 'GitHub beta',
+          description: 'Install the latest Android beta from GitHub Releases',
+          href: androidBetaUrl,
+          cta: 'Download Android beta',
+          icon: Download,
+          accent: 'bg-amber-500/12 text-amber-700 dark:text-amber-200',
+        },
+      ],
+    }
+  : {
+      badge: 'Mobile app',
+      BadgeIcon: Download,
+      title: 'Download Things Above',
+      description: 'Take Things Above with you each day on iPhone, iPad, or Android.',
+      options: [
+        {
+          title: 'iPhone & iPad',
+          channel: 'App Store',
+          description: 'Download Things Above from the App Store',
+          href: iosAppStoreUrl,
+          cta: 'Download on the App Store',
+          icon: Apple,
+          accent: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-200',
+          storeBadge: {
+            src: '/assets/icons/Download_on_the_App_Store_Badge.svg.png',
+            alt: 'Download on the App Store',
+          },
+        },
+        {
+          title: 'Android',
+          channel: 'Google Play',
+          description: 'Get Things Above for Android on Google Play',
+          href: androidPlayStoreUrl,
+          cta: 'Get it on Google Play',
+          icon: Download,
+          accent: 'bg-blue-500/12 text-blue-700 dark:text-blue-200',
+          storeBadge: {
+            src: '/assets/icons/Google_Play_Store_badge_EN.svg.png',
+            alt: 'Get it on Google Play',
+          },
+        },
+      ],
+    };
+
+function StoreBadgeImage({ badge }: { badge: StoreBadge }) {
+  return (
+    <Image src={badge.src} alt={badge.alt} width={3840} height={1138} className="h-auto w-full" />
+  );
+}
 
 export default function DownloadSection() {
+  const BadgeIcon = downloadContent.BadgeIcon;
+
   return (
     <section
       id="download"
@@ -32,23 +114,22 @@ export default function DownloadSection() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900/70 dark:bg-stone-950 dark:text-emerald-200">
-            <FlaskConical className="h-4 w-4" />
-            <span>Mobile beta</span>
+            <BadgeIcon className="h-4 w-4" />
+            <span>{downloadContent.badge}</span>
           </div>
 
           <div className="space-y-4">
             <h2 className="text-4xl font-semibold tracking-tight text-stone-950 dark:text-white sm:text-5xl">
-              Download the latest beta
+              {downloadContent.title}
             </h2>
             <p className="max-w-2xl text-lg leading-relaxed text-stone-600 dark:text-stone-300">
-              Take Things Above with you each day. Join the iOS beta through TestFlight or grab the
-              latest Android beta build.
+              {downloadContent.description}
             </p>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {downloadOptions.map((option) => {
+          {downloadContent.options.map((option) => {
             const Icon = option.icon;
 
             return (
@@ -79,7 +160,25 @@ export default function DownloadSection() {
                 </div>
 
                 <div className="mt-8 space-y-4">
-                  {option.href ? (
+                  {option.storeBadge ? (
+                    option.href ? (
+                      <a
+                        href={option.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={option.cta}
+                        className={`${storeBadgeClassName} hover:opacity-90`}>
+                        <StoreBadgeImage badge={option.storeBadge} />
+                      </a>
+                    ) : (
+                      <span
+                        aria-disabled="true"
+                        title="Link coming soon"
+                        className={`${storeBadgeClassName} cursor-not-allowed opacity-60`}>
+                        <StoreBadgeImage badge={option.storeBadge} />
+                      </span>
+                    )
+                  ) : option.href ? (
                     <a
                       href={option.href}
                       target="_blank"

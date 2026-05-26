@@ -22,6 +22,15 @@ type AdoptionProps = {
   axisLabels: string[];
   chartRangeLabel: string;
   avatars: AdoptionAvatar[];
+  copy: {
+    headlineStart: string;
+    headlineAccent: string;
+    intro: string;
+    chartLabel: string;
+    chartAriaLabel: string;
+    ctaPrompt: string;
+    ctaLabel: string;
+  };
 };
 
 function buildSmoothPath(chartPoints: Point[]) {
@@ -45,6 +54,7 @@ export default function Adoption({
   axisLabels,
   chartRangeLabel,
   avatars,
+  copy,
 }: AdoptionProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -108,13 +118,12 @@ export default function Adoption({
           transition={{ duration: 0.65 }}
           className="mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold leading-[1.05] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
-            Our first beta testers
-            <span className="mt-3 block text-[#1aa37a]">are already reading</span>
+            {copy.headlineStart}
+            <span className="mt-3 block text-[#1aa37a]">{copy.headlineAccent}</span>
           </h2>
 
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-2xl">
-            A small but growing group of early believers helping us shape the future of ThingsAbove,
-            one day at a time.
+            {copy.intro}
           </p>
         </motion.div>
 
@@ -143,7 +152,7 @@ export default function Adoption({
           transition={{ duration: 0.65, delay: 0.2 }}
           className="overflow-hidden rounded-[32px] border border-emerald-200/80 bg-white/90 p-5 shadow-[0_26px_70px_-40px_rgba(15,23,42,0.18)] backdrop-blur dark:border-emerald-900/70 dark:bg-white/5 dark:shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)] sm:p-8">
           <div className="text-lg text-slate-400 dark:text-slate-500 sm:text-[1.15rem]">
-            Beta tester growth | {chartRangeLabel}
+            {copy.chartLabel} | {chartRangeLabel}
           </div>
 
           <div className="mt-6 h-[18rem] sm:h-[25rem]">
@@ -151,7 +160,7 @@ export default function Adoption({
               viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
               className="h-full w-full"
               role="img"
-              aria-label={`Beta tester growth chart for ${chartRangeLabel}`}>
+              aria-label={`${copy.chartAriaLabel} for ${chartRangeLabel}`}>
               <defs>
                 <linearGradient id="adoption-area-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="rgba(26, 163, 122, 0.18)" />
@@ -237,14 +246,12 @@ export default function Adoption({
           )}
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-            <p className="text-2xl text-slate-600 dark:text-slate-300">
-              Want to be part of the beta?
-            </p>
+            <p className="text-2xl text-slate-600 dark:text-slate-300">{copy.ctaPrompt}</p>
             <button
               type="button"
               onClick={() => router.push('/auth/sign-up')}
               className="group inline-flex items-center gap-2 text-2xl font-medium text-[#1aa37a] transition-colors hover:text-[#148463] dark:text-emerald-400 dark:hover:text-emerald-300">
-              <span>Join early access</span>
+              <span>{copy.ctaLabel}</span>
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
           </div>

@@ -21,6 +21,8 @@ const AVATAR_CLASSES = [
   'bg-[#2466b4] text-white',
   'bg-[#0f766e] text-white',
 ];
+const CHART_SAMPLE_COUNT = 9;
+const AXIS_LABEL_INDEXES = [0, 3, 6, 8];
 
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -65,17 +67,29 @@ function formatRange(startDate: Date, endDate: Date) {
   return `${format(startDate, 'MMM d, yyyy')} - ${format(endDate, 'MMM d, yyyy')}`;
 }
 
+function buildSampleDates(startDate: Date, endDate: Date) {
+  const startTime = startDate.getTime();
+  const endTime = Math.max(endDate.getTime(), startTime);
+
+  return Array.from({ length: CHART_SAMPLE_COUNT }, (_, index) => {
+    const progress = index / Math.max(CHART_SAMPLE_COUNT - 1, 1);
+
+    return new Date(startTime + (endTime - startTime) * progress);
+  });
+}
+
+function buildAxisLabels(sampleDates: Date[]) {
+  return AXIS_LABEL_INDEXES.map((index) => format(sampleDates[index], 'MMM d'));
+}
+
 function buildFallbackMetrics(now = new Date()): AdoptionMetrics {
   const endDate = endOfDay(now);
   const startDate = startOfDay(subDays(endDate, 16));
-  const sampleDates = Array.from({ length: 9 }, (_, index) => {
-    const progress = index / 8;
-    return new Date(startDate.getTime() + (endDate.getTime() - startDate.getTime()) * progress);
-  });
+  const sampleDates = buildSampleDates(startDate, endDate);
 
   return {
     stats: [
-      { value: '0', label: 'Beta testers', valueClassName: 'text-slate-950 dark:text-white' },
+      { value: '0', label: 'Readers', valueClassName: 'text-slate-950 dark:text-white' },
       {
         value: '0',
         label: 'Active this week',
@@ -91,7 +105,7 @@ function buildFallbackMetrics(now = new Date()): AdoptionMetrics {
       label: format(date, 'MMM d'),
       value: 0,
     })),
-    axisLabels: [0, 3, 6, 8].map((index) => format(sampleDates[index], 'MMM d')),
+    axisLabels: buildAxisLabels(sampleDates),
     chartRangeLabel: formatRange(startDate, endDate),
     avatars: [],
   };
@@ -148,13 +162,10 @@ export const getAdoptionMetrics = unstable_cache(
       const activeToday = activeTimestamps.filter((date) => date >= todayCutoff).length;
 
       const chartEndDate = endOfDay(now);
-      const chartStartDate = startOfDay(subDays(chartEndDate, 16));
-      const sampleDates = Array.from({ length: 9 }, (_, index) => {
-        const progress = index / 8;
-        return new Date(
-          chartStartDate.getTime() + (chartEndDate.getTime() - chartStartDate.getTime()) * progress,
-        );
-      });
+      const chartStartDate = createdDates[0]
+        ? startOfDay(createdDates[0])
+        : startOfDay(subDays(chartEndDate, 16));
+      const sampleDates = buildSampleDates(chartStartDate, chartEndDate);
 
       let createdIndex = 0;
       const growthData = sampleDates.map((sampleDate) => {
@@ -211,7 +222,7 @@ export const getAdoptionMetrics = unstable_cache(
         stats: [
           {
             value: profiles.length.toLocaleString('en-US'),
-            label: 'Beta testers',
+            label: 'Readers',
             valueClassName: 'text-slate-950 dark:text-white',
           },
           {
@@ -226,7 +237,7 @@ export const getAdoptionMetrics = unstable_cache(
           },
         ],
         growthData,
-        axisLabels: [0, 3, 6, 8].map((index) => growthData[index]?.label ?? ''),
+        axisLabels: buildAxisLabels(sampleDates),
         chartRangeLabel: formatRange(chartStartDate, chartEndDate),
         avatars,
       };
