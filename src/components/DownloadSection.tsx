@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { isBetaSite } from '@/src/lib/site-channel';
 
 const iosBetaUrl = process.env.NEXT_PUBLIC_IOS_TESTFLIGHT_URL;
-const androidBetaUrl = process.env.NEXT_PUBLIC_ANDROID_BETA_URL;
+const androidTestingUrl = process.env.NEXT_PUBLIC_ANDROID_PLAY_TESTING_URL;
 const iosAppStoreUrl = process.env.NEXT_PUBLIC_IOS_APP_STORE_URL;
 const androidPlayStoreUrl = process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL;
 
@@ -41,7 +41,7 @@ const downloadContent: DownloadContent = isBetaSite
       BadgeIcon: FlaskConical,
       title: 'Download the latest beta',
       description:
-        'Take Things Above with you each day. Join the iOS beta through TestFlight or grab the latest Android beta build.',
+        'Take Things Above with you each day. Join the iOS beta through TestFlight or Android testing through Google Play.',
       options: [
         {
           title: 'iPhone & iPad',
@@ -54,10 +54,10 @@ const downloadContent: DownloadContent = isBetaSite
         },
         {
           title: 'Android',
-          channel: 'GitHub beta',
-          description: 'Install the latest Android beta from GitHub Releases',
-          href: androidBetaUrl,
-          cta: 'Download Android beta',
+          channel: 'Google Play testing',
+          description: 'Join the Android testing track on Google Play',
+          href: androidTestingUrl,
+          cta: 'Join Android testing',
           icon: Download,
           accent: 'bg-amber-500/12 text-amber-700 dark:text-amber-200',
         },
