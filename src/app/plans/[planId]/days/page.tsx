@@ -37,6 +37,14 @@ type Day = {
   title: string;
 };
 
+function hasReadingTag(tags: string[] | null | undefined) {
+  return tags?.some((tag) => tag.trim().toLowerCase() === 'reading') ?? false;
+}
+
+function hasScriptureReferences(day: Pick<Day, 'scriptures'>) {
+  return day.scriptures.some((reference) => reference.trim().length > 0);
+}
+
 function createEmptyDay(dayNumber: number): Day {
   return {
     day_number: dayNumber,
@@ -78,6 +86,7 @@ export default function PlanDaysPage() {
   const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const latestSubmission = latestSubmissionQuery.data ?? null;
+  const isReadingPlan = hasReadingTag(planQuery.data?.tags);
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
   const hasApprovedSubmission = latestSubmission?.status === 'approved';
@@ -132,21 +141,41 @@ export default function PlanDaysPage() {
   async function submitDays() {
     setSubmissionError(null);
 
-    const payload = normalizeDays(
-      days
-        .map((day) => ({
-          day_number: day.day_number,
-          content: day.content.trim(),
-          scriptures: day.scriptures,
-          id: day.id,
-          title: day.title.trim(),
-        }))
-        .filter((day) => day.content),
+    const preparedDays = normalizeDays(days).map((day) => ({
+      day_number: day.day_number,
+      content: day.content.trim(),
+      scriptures: day.scriptures.filter((reference) => reference.trim()),
+      id: day.id,
+      title: day.title.trim(),
+    }));
+
+    const daysMissingScriptureReferences = preparedDays.filter(
+      (day) => !hasScriptureReferences(day),
     );
 
-    if (!payload.length) {
-      alert('At least 1 day is required!');
+    if (daysMissingScriptureReferences.length) {
+      const missingDayLabels = daysMissingScriptureReferences.map((day) => `Day ${day.day_number}`);
+
+      setOpenDays((prev) =>
+        Array.from(new Set([...prev, ...daysMissingScriptureReferences.map((day) => day.id)])),
+      );
+      setSubmissionError(
+        `Every day needs at least 1 scripture reference before submitting. Add scripture to ${missingDayLabels.join(
+          ', ',
+        )}.`,
+      );
       return;
+    }
+
+    const payload = preparedDays;
+
+    if (!isReadingPlan) {
+      const daysMissingContent = preparedDays.filter((day) => !day.content);
+
+      if (daysMissingContent.length) {
+        alert('Every non-reading plan day needs devotional content.');
+        return;
+      }
     }
 
     if (!hasAcceptedContentStandards) {
@@ -309,9 +338,11 @@ export default function PlanDaysPage() {
         </div>
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
-          {isPrivatePlan
-            ? 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it privately for invited readers.'
-            : 'Add content and scripture for each day, then submit the draft for screening. Once approved, you can publish it to plan lists and search.'}
+          {isReadingPlan
+            ? 'This plan is tagged Reading. Add at least one scripture reference for every day; devotional notes are optional.'
+            : isPrivatePlan
+              ? 'Add devotional content and at least one scripture reference for every day, then submit the draft for screening. Once approved, you can publish it privately for invited readers.'
+              : 'Add devotional content and at least one scripture reference for every day, then submit the draft for screening. Once approved, you can publish it to plan lists and search.'}
         </p>
       </div>
 
@@ -361,10 +392,22 @@ export default function PlanDaysPage() {
                     {(day.title ?? '').length}/{DAY_TITLE_MAX}
                   </p>
 
-                  <RichTextEditor
-                    value={day.content}
-                    onChange={(html) => updateDay(index, { content: html })}
-                  />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                        {isReadingPlan ? 'Devotional notes (optional)' : 'Devotional content'}
+                      </p>
+                      {isReadingPlan && (
+                        <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+                          Reading tag
+                        </span>
+                      )}
+                    </div>
+                    <RichTextEditor
+                      value={day.content}
+                      onChange={(html) => updateDay(index, { content: html })}
+                    />
+                  </div>
 
                   <ScriptureSelector
                     value={day.scriptures}
