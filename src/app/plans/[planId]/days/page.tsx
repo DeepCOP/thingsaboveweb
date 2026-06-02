@@ -167,17 +167,15 @@ export default function PlanDaysPage() {
       return;
     }
 
-    const payload = preparedDays.filter((day) =>
-      isReadingPlan ? hasScriptureReferences(day) : day.content,
-    );
+    const payload = preparedDays;
 
-    if (!payload.length) {
-      alert(
-        isReadingPlan
-          ? 'At least 1 day with scripture references is required for plans tagged Reading.'
-          : 'At least 1 day with devotional content is required.',
-      );
-      return;
+    if (!isReadingPlan) {
+      const daysMissingContent = preparedDays.filter((day) => !day.content);
+
+      if (daysMissingContent.length) {
+        alert('Every non-reading plan day needs devotional content.');
+        return;
+      }
     }
 
     if (!hasAcceptedContentStandards) {
