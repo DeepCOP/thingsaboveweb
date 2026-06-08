@@ -3,10 +3,8 @@ import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import { isBetaSite } from '@/src/lib/site-channel';
 
-const iosBetaUrl = process.env.NEXT_PUBLIC_IOS_TESTFLIGHT_URL;
-const androidTestingUrl = process.env.NEXT_PUBLIC_ANDROID_PLAY_TESTING_URL;
-const iosAppStoreUrl = process.env.NEXT_PUBLIC_IOS_APP_STORE_URL;
-const androidPlayStoreUrl = process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL;
+const iosDownloadUrl = process.env.NEXT_PUBLIC_IOS_DOWNLOAD_URL;
+const androidDownloadUrl = process.env.NEXT_PUBLIC_ANDROID_DOWNLOAD_URL;
 
 type StoreBadge = {
   src: string;
@@ -47,7 +45,7 @@ const downloadContent: DownloadContent = isBetaSite
           title: 'iPhone & iPad',
           channel: 'TestFlight beta',
           description: 'Get the latest approved iOS beta',
-          href: iosBetaUrl,
+          href: iosDownloadUrl,
           cta: 'Join on TestFlight',
           icon: Smartphone,
           accent: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-200',
@@ -56,7 +54,7 @@ const downloadContent: DownloadContent = isBetaSite
           title: 'Android',
           channel: 'Google Play testing',
           description: 'Join the Android testing track on Google Play',
-          href: androidTestingUrl,
+          href: androidDownloadUrl,
           cta: 'Join Android testing',
           icon: Download,
           accent: 'bg-amber-500/12 text-amber-700 dark:text-amber-200',
@@ -73,7 +71,7 @@ const downloadContent: DownloadContent = isBetaSite
           title: 'iPhone & iPad',
           channel: 'App Store',
           description: 'Download Things Above from the App Store',
-          href: iosAppStoreUrl,
+          href: iosDownloadUrl,
           cta: 'Download on the App Store',
           icon: Apple,
           accent: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-200',
@@ -86,7 +84,7 @@ const downloadContent: DownloadContent = isBetaSite
           title: 'Android',
           channel: 'Google Play',
           description: 'Get Things Above for Android on Google Play',
-          href: androidPlayStoreUrl,
+          href: androidDownloadUrl,
           cta: 'Get it on Google Play',
           icon: Download,
           accent: 'bg-blue-500/12 text-blue-700 dark:text-blue-200',
