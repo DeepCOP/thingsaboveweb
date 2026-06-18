@@ -173,6 +173,10 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 {isLoading ? 'Creating an account...' : 'Sign up'}
               </Button>
               <OAuthButtons
+                buttonLabels={{
+                  apple: 'Sign in with Apple',
+                  google: 'Sign in with Google',
+                }}
                 disabled={isLoading}
                 onBeforeStart={() => {
                   if (acceptedPolicies) return true;
