@@ -3,6 +3,7 @@
 import { cn } from '@/src/lib/utils';
 import { createClient } from '@/src/lib/supabase/client';
 import { Button } from '@/src/components/ui/button';
+import { OAuthButtons } from '@/src/components/oauth-buttons';
 import {
   Card,
   CardContent,
@@ -171,6 +172,19 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Creating an account...' : 'Sign up'}
               </Button>
+              <OAuthButtons
+                buttonLabels={{
+                  apple: 'Sign in with Apple',
+                  google: 'Sign in with Google',
+                }}
+                disabled={isLoading}
+                onBeforeStart={() => {
+                  if (acceptedPolicies) return true;
+
+                  setError(LEGAL_CONSENT_ERROR);
+                  return false;
+                }}
+              />
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{' '}

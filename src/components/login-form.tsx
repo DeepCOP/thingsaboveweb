@@ -3,6 +3,7 @@
 import { cn } from '@/src/lib/utils';
 import { createClient } from '@/src/lib/supabase/client';
 import { Button } from '@/src/components/ui/button';
+import { OAuthButtons } from '@/src/components/oauth-buttons';
 import {
   Card,
   CardContent,
@@ -86,6 +87,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
+              <OAuthButtons disabled={isLoading} />
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{' '}
