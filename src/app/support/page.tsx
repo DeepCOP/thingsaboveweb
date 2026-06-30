@@ -14,7 +14,7 @@ import { Label } from '@/src/components/ui/label';
 import { Mail, ArrowLeft, Send, HelpCircle, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
-const SUPPORT_EMAIL = 'godwinwoo@gmail.com';
+const SUPPORT_EMAIL = 'info@thingsabove.life';
 
 const supportCategories = [
   { value: 'general', label: 'General Question' },
