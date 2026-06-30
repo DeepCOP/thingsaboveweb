@@ -71,6 +71,13 @@ export default function Footer() {
                   Community
                 </a>
               </li>
+              <li>
+                <Link
+                  href="/support"
+                  className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400">
+                  Support
+                </Link>
+              </li>
             </ul>
           </div>
 
