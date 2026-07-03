@@ -247,5 +247,5 @@ export const getAdoptionMetrics = unstable_cache(
     }
   },
   ['adoption-metrics'],
-  { revalidate: 1800 },
+  { revalidate: 600 },
 );

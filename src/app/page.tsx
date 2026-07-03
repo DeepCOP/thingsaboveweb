@@ -8,6 +8,8 @@ import AdoptionSkeleton from '@/src/components/AdoptionSkeleton';
 import DownloadSection from '@/src/components/DownloadSection';
 import CTA from '@/src/components/CTA';
 
+export const revalidate = 600;
+
 export default function Home() {
   return (
     <main className="min-h-screen">
