@@ -58,6 +58,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/privacy/') ||
     pathname === '/account/deletion-request' ||
     pathname.startsWith('/account/deletion-request/') ||
+    pathname.startsWith('/support/') ||
     pathname.startsWith('/.well-known') ||
     pathname.startsWith('/auth');
 
