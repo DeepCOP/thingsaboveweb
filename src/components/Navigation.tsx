@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, BookOpen, Menu, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,6 +12,8 @@ export default function Navigation() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { isGuest, signOut } = useAuth();
   const pathname = usePathname();
@@ -34,8 +36,21 @@ export default function Navigation() {
       }
     };
 
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (!menuRef.current?.contains(target) && !menuButtonRef.current?.contains(target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
   }, [isMenuOpen]);
 
   const navigateToSection = (id: string) => {
@@ -147,6 +162,7 @@ export default function Navigation() {
           </div>
 
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setIsMenuOpen((open) => !open)}
             className="nav:hidden p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors"
@@ -160,6 +176,7 @@ export default function Navigation() {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
+              ref={menuRef}
               id="mobile-navigation-menu"
               initial={{ opacity: 0, y: -12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
