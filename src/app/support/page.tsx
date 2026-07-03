@@ -73,7 +73,9 @@ export default function SupportPage() {
     lines.push('');
     lines.push(`Name: ${name || '(not provided)'}`);
     lines.push(`Email: ${email}`);
-    lines.push(`Category: ${category ? supportCategories.find((c) => c.value === category)?.label : '(not selected)'}`);
+    lines.push(
+      `Category: ${category ? supportCategories.find((c) => c.value === category)?.label : '(not selected)'}`,
+    );
     lines.push('');
     lines.push('Message:');
     lines.push('--------');
@@ -88,7 +90,9 @@ export default function SupportPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const subject = encodeURIComponent(`Support Request - ${category ? supportCategories.find((c) => c.value === category)?.label : 'General'} - ${email}`);
+    const subject = encodeURIComponent(
+      `Support Request - ${category ? supportCategories.find((c) => c.value === category)?.label : 'General'} - ${email}`,
+    );
     const body = encodeURIComponent(buildMailBody());
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
   };
@@ -129,9 +133,7 @@ export default function SupportPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Your Contact Information</CardTitle>
-              <CardDescription>
-                Provide your details so we can follow up with you.
-              </CardDescription>
+              <CardDescription>Provide your details so we can follow up with you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
