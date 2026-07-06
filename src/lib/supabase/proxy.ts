@@ -46,23 +46,11 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute =
-    pathname === '/' ||
-    pathname === '/download' ||
-    pathname.startsWith('/download/') ||
-    pathname === '/terms' ||
-    pathname.startsWith('/terms/') ||
-    pathname === '/statement-of-faith' ||
-    pathname.startsWith('/statement-of-faith/') ||
-    pathname === '/privacy' ||
-    pathname.startsWith('/privacy/') ||
-    pathname === '/account/deletion-request' ||
-    pathname.startsWith('/account/deletion-request/') ||
-    pathname.startsWith('/support/') ||
-    pathname.startsWith('/.well-known') ||
-    pathname.startsWith('/auth');
+  // Protect known private areas explicitly so unmatched URLs can render the public 404 page.
+  // Add any future authenticated route prefixes here.
+  const isProtectedRoute = pathname === '/plans' || pathname.startsWith('/plans/');
 
-  if (!isPublicRoute && !user && !pathname.startsWith('/login')) {
+  if (isProtectedRoute && !user) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = '/auth/login';
