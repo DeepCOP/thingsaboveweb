@@ -37,8 +37,18 @@ type Day = {
   title: string;
 };
 
-function hasReadingTag(tags: string[] | null | undefined) {
-  return tags?.some((tag) => tag.trim().toLowerCase() === 'reading') ?? false;
+const SCRIPTURE_FOCUSED_PLAN_TAG_LABELS: Record<string, string> = {
+  reading: 'Reading',
+  memorization: 'Memorization',
+};
+
+function getScriptureFocusedPlanLabel(tags: string[] | null | undefined) {
+  for (const tag of tags ?? []) {
+    const label = SCRIPTURE_FOCUSED_PLAN_TAG_LABELS[tag.trim().toLowerCase()];
+    if (label) return label;
+  }
+
+  return null;
 }
 
 function hasScriptureReferences(day: Pick<Day, 'scriptures'>) {
@@ -86,7 +96,8 @@ export default function PlanDaysPage() {
   const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const latestSubmission = latestSubmissionQuery.data ?? null;
-  const isReadingPlan = hasReadingTag(planQuery.data?.tags);
+  const scriptureFocusedPlanLabel = getScriptureFocusedPlanLabel(planQuery.data?.tags);
+  const isScriptureFocusedPlan = scriptureFocusedPlanLabel !== null;
   const hasActiveSubmission =
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
   const hasApprovedSubmission = latestSubmission?.status === 'approved';
@@ -169,11 +180,11 @@ export default function PlanDaysPage() {
 
     const payload = preparedDays;
 
-    if (!isReadingPlan) {
+    if (!isScriptureFocusedPlan) {
       const daysMissingContent = preparedDays.filter((day) => !day.content);
 
       if (daysMissingContent.length) {
-        alert('Every non-reading plan day needs devotional content.');
+        alert('Every day in this plan needs devotional content.');
         return;
       }
     }
@@ -338,8 +349,8 @@ export default function PlanDaysPage() {
         </div>
 
         <p className="mt-2 text-gray-500 dark:text-gray-300">
-          {isReadingPlan
-            ? 'This plan is tagged Reading. Add at least one scripture reference for every day; devotional notes are optional.'
+          {isScriptureFocusedPlan
+            ? `This plan is tagged ${scriptureFocusedPlanLabel}. Add at least one scripture reference for every day; devotional notes are optional.`
             : isPrivatePlan
               ? 'Add devotional content and at least one scripture reference for every day, then submit the draft for screening. Once approved, you can publish it privately for invited readers.'
               : 'Add devotional content and at least one scripture reference for every day, then submit the draft for screening. Once approved, you can publish it to plan lists and search.'}
@@ -395,11 +406,13 @@ export default function PlanDaysPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        {isReadingPlan ? 'Devotional notes (optional)' : 'Devotional content'}
+                        {isScriptureFocusedPlan
+                          ? 'Devotional notes (optional)'
+                          : 'Devotional content'}
                       </p>
-                      {isReadingPlan && (
+                      {isScriptureFocusedPlan && (
                         <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-                          Reading tag
+                          {scriptureFocusedPlanLabel} tag
                         </span>
                       )}
                     </div>
