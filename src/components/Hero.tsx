@@ -87,29 +87,6 @@ export default function Hero() {
               <span>Read With Friends</span>
             </motion.button>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="pt-16">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-              Join thousands growing in faith every day
-            </p>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 border-2 border-white dark:border-neutral-900"
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-neutral-600 dark:text-neutral-400 ml-4">
-                12,000+ active readers
-              </span>
-            </div>
-          </motion.div>
         </motion.div>
       </div>
     </section>
