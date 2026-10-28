@@ -104,4 +104,6 @@ export type DEvotionalPlanInput = {
 export type Reports = Database['public']['Tables']['reports']['Row'];
 
 export type GetMyDevotionalPlans =
-  Database['public']['Functions']['get_my_devotional_plans']['Returns'];
+  (Database['public']['Functions']['get_my_devotional_plans']['Returns'][number] & {
+    draft_total_days: number | null;
+  })[];

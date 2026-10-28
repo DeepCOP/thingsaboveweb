@@ -21,6 +21,12 @@ export default function PlanCard({
   const router = useRouter();
   const reportCount = reports.filter((report) => report.plan_id === plan.id).length;
   const visibilityLabel = plan.visibility === 'private' ? 'Private' : 'Public';
+  const displayedDays =
+    plan.status === 'draft' ? (plan.draft_total_days ?? plan.total_days) : plan.total_days;
+  const showDraftDays =
+    plan.status === 'published' &&
+    plan.draft_total_days !== null &&
+    plan.draft_total_days !== plan.total_days;
   const handleDelete = () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${plan.title}"?\nThis action cannot be undone.`,
@@ -65,7 +71,10 @@ export default function PlanCard({
         <PlanStatsCard helpfulCount={plan.helpful_count} reports={reportCount} />
 
         <div className="flex items-center justify-between pt-3">
-          <span className="text-sm text-gray-400">{plan.total_days} days</span>
+          <div className="text-sm text-gray-400">
+            <span>{displayedDays} days</span>
+            {showDraftDays && <p className="text-xs">Draft: {plan.draft_total_days} days</p>}
+          </div>
           <div className="flex items-center gap-3">
             <button onClick={() => router.push(`/plans/${plan.id}/edit`)}>
               <Edit />

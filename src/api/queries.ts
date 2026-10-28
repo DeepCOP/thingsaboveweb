@@ -1,4 +1,4 @@
-import { DevotionalDayInput, PlanSubmission } from '@/src/types/types';
+import { GetMyDevotionalPlans, PlanSubmission } from '@/src/types/types';
 import supabase from '../lib/supabaseClient';
 
 export async function getDevotionalById(id: string) {
@@ -36,10 +36,30 @@ export const getPlansReports = async (planIds: string[]) => {
   return data;
 };
 
-export const getMyDevotionalPlans = async () => {
+export const getMyDevotionalPlans = async (): Promise<GetMyDevotionalPlans> => {
   const { data, error } = await supabase.rpc('get_my_devotional_plans');
   if (error) throw error;
-  return data;
+  if (!data?.length) return [];
+
+  const { data: draftCounts, error: draftCountsError } = await supabase
+    .from('devotional_plans')
+    .select('id, devotional_days_draft(count)')
+    .in(
+      'id',
+      data.map((plan) => plan.id),
+    );
+
+  if (draftCountsError) throw draftCountsError;
+
+  const draftDaysByPlan = new Map(
+    (draftCounts ?? []).map((plan) => [plan.id, plan.devotional_days_draft[0]?.count ?? 0]),
+  );
+
+  return data.map((plan) => ({
+    ...plan,
+    // A new plan has no saved draft rows until its first save.
+    draft_total_days: draftDaysByPlan.get(plan.id) || null,
+  }));
 };
 
 export const getDevotionalDays = async (planId: string) => {

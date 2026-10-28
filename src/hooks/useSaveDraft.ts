@@ -10,6 +10,9 @@ export function useSaveDevotionalDraft(planId: string) {
       queryClient.invalidateQueries({
         queryKey: ['devotional-drafts', planId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['my-devotional-plans'],
+      });
     },
   });
 }
