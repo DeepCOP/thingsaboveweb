@@ -144,7 +144,9 @@ export default function PlanCard({
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <span className="inline-flex items-center gap-1.5 font-medium text-stone-700 dark:text-neutral-200">
             <BookOpen aria-hidden="true" className="h-4 w-4 text-stone-400 dark:text-neutral-500" />
-            {displayedDays} {displayedDays === 1 ? 'day' : 'days'}
+            {isDraft && plan.draft_count_unavailable
+              ? 'Draft day count unavailable'
+              : `${displayedDays} ${displayedDays === 1 ? 'day' : 'days'}`}
           </span>
           {isDraft ? (
             <span className="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-neutral-400">
@@ -162,6 +164,12 @@ export default function PlanCard({
           <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             <PencilLine aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
             Saved draft: {plan.draft_total_days} {plan.draft_total_days === 1 ? 'day' : 'days'}
+          </p>
+        )}
+        {!isDraft && plan.draft_count_unavailable && (
+          <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <PencilLine aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+            Saved draft day count is temporarily unavailable.
           </p>
         )}
         {!reportsLoading && !reportsUnavailable && reportCount > 0 && (

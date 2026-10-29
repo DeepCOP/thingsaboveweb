@@ -49,7 +49,14 @@ export const getMyDevotionalPlans = async (): Promise<GetMyDevotionalPlans> => {
       data.map((plan) => plan.id),
     );
 
-  if (draftCountsError) throw draftCountsError;
+  if (draftCountsError) {
+    console.error('Failed to load saved draft day counts', draftCountsError);
+    return data.map((plan) => ({
+      ...plan,
+      draft_total_days: null,
+      draft_count_unavailable: true,
+    }));
+  }
 
   const draftDaysByPlan = new Map(
     (draftCounts ?? []).map((plan) => [plan.id, plan.devotional_days_draft[0]?.count ?? 0]),
@@ -59,6 +66,7 @@ export const getMyDevotionalPlans = async (): Promise<GetMyDevotionalPlans> => {
     ...plan,
     // A new plan has no saved draft rows until its first save.
     draft_total_days: draftDaysByPlan.get(plan.id) || null,
+    draft_count_unavailable: false,
   }));
 };
 
