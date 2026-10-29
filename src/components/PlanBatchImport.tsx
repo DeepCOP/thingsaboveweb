@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { createImportedDevotionalPlan, saveDevotionalDraft } from '@/src/api/mutations';
+import { usePlanTags } from '@/src/hooks/useDevotionalPlan';
 import { createImportedDays, type ImportedPlan } from '@/src/lib/planImport';
 import { runPlanImportBatch, type PlanImportTask } from '@/src/lib/planImportBatch';
 import { useAuth } from '@/src/state/AuthContext';
@@ -12,14 +13,21 @@ import ImportedCoverPreview from './ImportedCoverPreview';
 export default function PlanBatchImport({
   plans,
   initialVisibility,
+  initialTags,
   onBack,
 }: {
   plans: ImportedPlan[];
   initialVisibility: 'public' | 'private';
+  initialTags: string[];
   onBack: () => void;
 }) {
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const {
+    data: availableTags = [],
+    isLoading: isLoadingPlanTags,
+    isError: hasPlanTagsError,
+  } = usePlanTags();
   const [tasks, setTasks] = useState<PlanImportTask[]>(() =>
     plans.map((plan, index) => ({
       id: crypto.randomUUID(),
@@ -27,12 +35,13 @@ export default function PlanBatchImport({
       title: plan.title || '',
       description: plan.description || '',
       coverImage: plan.coverImage,
+      visibility: initialVisibility,
+      tags: [...initialTags],
       days: createImportedDays(plan.days),
       created: false,
       status: 'pending',
     })),
   );
-  const [visibility, setVisibility] = useState(initialVisibility);
   const [started, setStarted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +54,9 @@ export default function PlanBatchImport({
 
   function updateDetails(
     index: number,
-    updates: Partial<Pick<PlanImportTask, 'title' | 'description' | 'coverImage'>>,
+    updates: Partial<
+      Pick<PlanImportTask, 'title' | 'description' | 'coverImage' | 'visibility' | 'tags'>
+    >,
   ) {
     if (started) return;
     setTasks((current) => current.map((task, i) => (i === index ? { ...task, ...updates } : task)));
@@ -67,7 +78,6 @@ export default function PlanBatchImport({
         tasks,
         {
           authorId: session.user.id,
-          visibility,
         },
         {
           createPlan: createImportedDevotionalPlan,
@@ -100,31 +110,9 @@ export default function PlanBatchImport({
           Review {tasks.length} imported plans
         </h1>
         <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-          Check the title and description for each plan. Each will be saved as a separate draft. You
-          can edit its days, change its cover, add tags, and submit it for screening afterward.
+          Check each plan and choose its visibility and tags before creating the drafts.
         </p>
       </div>
-
-      <fieldset
-        disabled={started}
-        className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
-        <label htmlFor="batch-plan-visibility" className="block text-sm font-semibold">
-          Visibility after approval
-        </label>
-        <select
-          id="batch-plan-visibility"
-          value={visibility}
-          onChange={(event) =>
-            setVisibility(event.target.value === 'private' ? 'private' : 'public')
-          }
-          className="mt-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <option value="public">Public — discoverable after screening</option>
-          <option value="private">Private — shared by you</option>
-        </select>
-        <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-          Applies to all plans in this import. You can change each plan later.
-        </p>
-      </fieldset>
 
       <div className="space-y-4">
         {tasks.map((task, index) => (
@@ -169,6 +157,61 @@ export default function PlanBatchImport({
                   onChange={(event) => updateDetails(index, { description: event.target.value })}
                   className="mt-1 w-full rounded-lg border border-neutral-300 bg-transparent px-3 py-2 disabled:opacity-70 dark:border-neutral-700"
                 />
+              </div>
+              <div>
+                <label htmlFor={`plan-visibility-${task.id}`} className="block text-sm font-medium">
+                  Visibility after approval
+                </label>
+                <select
+                  id={`plan-visibility-${task.id}`}
+                  value={task.visibility}
+                  onChange={(event) =>
+                    updateDetails(index, {
+                      visibility: event.target.value === 'private' ? 'private' : 'public',
+                    })
+                  }
+                  className="mt-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm disabled:opacity-70 dark:border-neutral-700 dark:bg-neutral-900">
+                  <option value="public">Public — discoverable after screening</option>
+                  <option value="private">Private — shared by you</option>
+                </select>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Tags</p>
+                {isLoadingPlanTags ? (
+                  <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                    Loading tags…
+                  </p>
+                ) : hasPlanTagsError ? (
+                  <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+                    Tags could not be loaded. You can continue without them and add tags later.
+                  </p>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {availableTags.map((tag) => {
+                      const selected = task.tags.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() =>
+                            updateDetails(index, {
+                              tags: selected
+                                ? task.tags.filter((currentTag) => currentTag !== tag)
+                                : [...task.tags, tag],
+                            })
+                          }
+                          className={`rounded-full border px-3 py-1.5 text-sm transition disabled:opacity-70 ${
+                            selected
+                              ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-200'
+                              : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200'
+                          }`}>
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               {task.coverImage && (
                 <div className="space-y-2">

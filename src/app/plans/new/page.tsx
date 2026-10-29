@@ -178,6 +178,7 @@ export default function CreatePlanPage() {
       <PlanBatchImport
         plans={batchPlans}
         initialVisibility={visibility}
+        initialTags={selectedTags}
         onBack={() => {
           setBatchPlans(null);
           setOpenImportOnLoad(false);
