@@ -6,6 +6,8 @@ export type PlanImportTask = {
   title: string;
   description: string;
   coverImage?: string;
+  visibility: 'public' | 'private';
+  tags: string[];
   days: DevotionalDayInput[];
   created: boolean;
   status: 'pending' | 'creating' | 'saving' | 'saved' | 'failed';
@@ -14,7 +16,6 @@ export type PlanImportTask = {
 
 type Options = {
   authorId: string;
-  visibility: 'public' | 'private';
 };
 
 type Mutations = {
@@ -61,8 +62,9 @@ export async function runPlanImportBatch(
           title: task.title.trim(),
           description: task.description.trim(),
           cover_image: task.coverImage,
+          tags: task.tags.length ? task.tags : null,
           total_days: task.days.length,
-          visibility: options.visibility,
+          visibility: task.visibility,
         });
         update(index, { created: true });
       }
