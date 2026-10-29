@@ -253,9 +253,13 @@ export default function PlanImportDialog({
                 type="file"
                 accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
                 disabled={disabled}
+                onClick={(event) => {
+                  // Reset immediately before browsing so choosing the same file again still fires
+                  // onChange, while keeping the selected filename visible after a choice.
+                  event.currentTarget.value = '';
+                }}
                 onChange={(event) => {
                   const file = event.target.files?.[0];
-                  event.target.value = '';
                   if (file) void readFile(file);
                 }}
                 className="mt-3 block w-full text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-4 file:py-2 file:font-medium file:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:text-neutral-300"
