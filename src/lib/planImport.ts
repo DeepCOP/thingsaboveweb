@@ -216,9 +216,9 @@ function parseColumns(header: unknown[]) {
       issues.push(`Header row: more than one column maps to "${column}". Keep only one.`);
     else columns.set(column, index);
   });
-  if (!columns.has('content') && !columns.has('scriptures')) {
+  if (!columns.size) {
     issues.push(
-      'Include a "content" or "scriptures" column. Download the template for an example.',
+      'Include at least one recognized plan or day column. Download the template for an example.',
     );
   }
   if (issues.length) throw new PlanImportError(issues);
@@ -340,8 +340,11 @@ export function parsePlanRows(rows: unknown[][]): ImportedPlan {
     }
   }
 
-  if (!dayRows.length)
-    addIssue('No days were found. Add at least one row with a day title, content, or scripture.');
+  // if (!dayRows.length) {
+  //   warnings.push(
+  //     'No days were found. This plan will start with an empty Day 1; add or import its days from the Days page.',
+  //   );
+  // }
 
   const hasDayNumbers = dayRows.some(({ number }) => number !== '');
   const seenNumbers = new Set<number>();
