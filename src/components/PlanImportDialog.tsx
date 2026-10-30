@@ -15,7 +15,7 @@ import type { ImportedPlan } from '@/src/lib/planImport';
 import ImportedCoverPreview from './ImportedCoverPreview';
 
 type Props = {
-  onImport: (plans: ImportedPlan[], mode: 'append' | 'replace') => void;
+  onImport: (plan: ImportedPlan, mode: 'append' | 'replace') => void;
   mode?: 'new' | 'existing';
   existingDayCount?: number;
   disabled?: boolean;
@@ -32,8 +32,7 @@ export default function PlanImportDialog({
   defaultOpen = false,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [plans, setPlans] = useState<ImportedPlan[]>([]);
-  const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
+  const [plan, setPlan] = useState<ImportedPlan | null>(null);
   const [fileName, setFileName] = useState('');
   const [reading, setReading] = useState(false);
   const [issues, setIssues] = useState<string[]>([]);
@@ -66,16 +65,14 @@ export default function PlanImportDialog({
   async function readFile(file: File) {
     const request = ++readRequest.current;
     setReading(true);
-    setPlans([]);
-    setSelectedPlanIndex(null);
+    setPlan(null);
     setIssues([]);
     setFileName(file.name);
     try {
-      const { parsePlansFile } = await import('@/src/lib/planImport');
-      const imported = await parsePlansFile(file);
+      const { parsePlanFile } = await import('@/src/lib/planImport');
+      const imported = await parsePlanFile(file);
       if (request === readRequest.current) {
-        setPlans(imported);
-        setSelectedPlanIndex(mode === 'existing' && imported.length > 1 ? null : 0);
+        setPlan(imported);
       }
     } catch (error) {
       if (request !== readRequest.current) return;
@@ -97,26 +94,17 @@ export default function PlanImportDialog({
     }
   }
 
-  const plan = selectedPlanIndex === null ? null : (plans[selectedPlanIndex] ?? null);
-  const totalImportedDays = plans.reduce(
-    (total, importedPlan) => total + importedPlan.days.length,
-    0,
-  );
   const resultingDayCount =
     (plan?.days.length ?? 0) +
     (mode === 'existing' && importMode === 'append' ? existingDayCount : 0);
-  const exceedsDayLimit =
-    mode === 'existing'
-      ? resultingDayCount > 365
-      : plans.some((importedPlan) => importedPlan.days.length > 365);
+  const exceedsDayLimit = resultingDayCount > 365;
 
   function applyImport() {
     if (!plan || disabled || reading || exceedsDayLimit) return;
     try {
-      onImport(mode === 'new' ? plans : [plan], mode === 'new' ? 'replace' : importMode);
+      onImport(plan, mode === 'new' ? 'replace' : importMode);
       changeOpen(false);
-      setPlans([]);
-      setSelectedPlanIndex(null);
+      setPlan(null);
       setFileName('');
       setIssues([]);
     } catch (error) {
@@ -140,12 +128,12 @@ export default function PlanImportDialog({
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100%_-_2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900">
           <div className="border-b border-neutral-200 px-5 py-5 pr-14 dark:border-neutral-800 sm:px-6">
             <Dialog.Title className="text-xl font-semibold text-neutral-900 dark:text-white">
-              {mode === 'new' ? 'Import plans' : 'Import plan days'}
+              {mode === 'new' ? 'Import a plan' : 'Import plan days'}
             </Dialog.Title>
             <Dialog.Description className="mt-1.5 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
               {mode === 'new'
-                ? 'Bring in one or more plans from an Excel workbook or CSV, then review their details.'
-                : 'Choose a plan from your file to add its days to this editor. Save Draft when you are ready.'}
+                ? 'Bring in one plan from an Excel workbook or CSV, then review its details.'
+                : 'Import the plan days from your file into this editor. Save Draft when you are ready.'}
             </Dialog.Description>
           </div>
           <Dialog.Close asChild>
@@ -163,31 +151,20 @@ export default function PlanImportDialog({
                 Start with the template
               </p>
               <p className="mt-1.5 leading-6 text-neutral-600 dark:text-neutral-400">
-                Use one row per day. For multiple plans, add a <code>plan_key</code> column and
-                repeat the same key on every day of each plan. Use a different key for each plan.
-                Restart <code>day_number</code> at 1 for each plan.
+                Use one row per day and one plan per file. Start <code>day_number</code> at 1 and
+                continue without gaps.
               </p>
-              <div className="mt-3 space-y-3">
-                {[
-                  { label: 'One plan', name: 'devotional-plan-template' },
-                  { label: 'Multiple plans', name: 'devotional-plans-template' },
-                ].map((template) => (
-                  <div key={template.name} className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <span className="w-28 font-medium text-neutral-700 dark:text-neutral-300">
-                      {template.label}
-                    </span>
-                    {['xlsx', 'csv'].map((extension) => (
-                      <a
-                        key={extension}
-                        href={`/templates/${template.name}.${extension}`}
-                        download
-                        aria-label={`Download ${template.label.toLowerCase()} ${extension === 'xlsx' ? 'Excel' : 'CSV'} template`}
-                        className="inline-flex items-center gap-1.5 font-medium text-emerald-700 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:text-emerald-400">
-                        <Download className="h-4 w-4" aria-hidden="true" />
-                        {extension === 'xlsx' ? 'Excel' : 'CSV'}
-                      </a>
-                    ))}
-                  </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                {['xlsx', 'csv'].map((extension) => (
+                  <a
+                    key={extension}
+                    href={`/templates/devotional-plan-template.${extension}`}
+                    download
+                    aria-label={`Download ${extension === 'xlsx' ? 'Excel' : 'CSV'} plan template`}
+                    className="inline-flex items-center gap-1.5 font-medium text-emerald-700 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:text-emerald-400">
+                    <Download className="h-4 w-4" aria-hidden="true" />
+                    {extension === 'xlsx' ? 'Excel' : 'CSV'}
+                  </a>
                 ))}
               </div>
               <details className="mt-3 text-neutral-600 dark:text-neutral-400">
@@ -196,18 +173,17 @@ export default function PlanImportDialog({
                 </summary>
                 <ul className="mt-2 list-disc space-y-1 pl-5 leading-6">
                   <li>
-                    Use .xlsx or UTF-8 .csv files up to 5 MB, with at most 50 plans and 365 days per
-                    plan. Save older .xls files as .xlsx first.
+                    Use an .xlsx or UTF-8 .csv file up to 5 MB with one plan and at most 365 days.
+                    Save older .xls files as .xlsx first.
                   </li>
                   <li>
-                    Excel reads the Days worksheet when present. Otherwise, it reads each nonempty
-                    worksheet and skips a sheet named Instructions. You can put each plan on its own
-                    sheet.
+                    Excel reads the Days worksheet when present. Otherwise, keep the plan in one
+                    populated worksheet. A sheet named Instructions is ignored.
                   </li>
                   <li>
                     Keep the day columns: day_number, title, content, and scriptures. Day numbers
-                    must run from 1 without gaps or duplicates within each plan. Leave day_number
-                    out to use row order.
+                    must run from 1 without gaps or duplicates. Leave day_number out to use row
+                    order.
                   </li>
                   <li>
                     Separate scripture references with semicolons, for example John 3:16; Romans
@@ -218,17 +194,16 @@ export default function PlanImportDialog({
                     formulas.
                   </li>
                   <li>
-                    Add plan_title and plan_description on the first row of each plan. Repeated
-                    values must match within that plan. You can fill missing details before saving.
+                    Add plan_title and plan_description on the first row. Repeated values must match
+                    throughout the file. You can fill missing details before saving.
                   </li>
                   <li>
                     An optional cover_image column can supply a public http:// or https:// image
-                    URL. Set it once per plan, or repeat the same URL. Local file paths and embedded
-                    workbook pictures are not imported.
+                    URL. Set it once, or repeat the same URL. Local file paths and embedded workbook
+                    pictures are not imported.
                   </li>
                   <li>
-                    Files for one plan still work without plan_key. Without that column, a new
-                    plan_title starts a plan and blank titles continue the previous one.
+                    Do not use plan_key or plan_id columns. Import each plan from a separate file.
                   </li>
                   <li>
                     Missing content or scripture references can be completed in the editor before
@@ -300,54 +275,15 @@ export default function PlanImportDialog({
               </div>
             )}
 
-            {plans.length > 0 && (
+            {plan && (
               <div className="space-y-3 text-sm">
                 <p
                   role="status"
                   className="flex items-center gap-2 font-semibold text-emerald-800 dark:text-emerald-300">
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                  {plans.length} {plans.length === 1 ? 'plan' : 'plans'} found with{' '}
-                  {totalImportedDays} {totalImportedDays === 1 ? 'day' : 'days'}
+                  One plan found with {plan.days.length} {plan.days.length === 1 ? 'day' : 'days'}
                 </p>
                 <p className="break-all text-neutral-500 dark:text-neutral-400">{fileName}</p>
-                {plans.length > 1 && (
-                  <div className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
-                    <label
-                      htmlFor="plan-import-selection"
-                      className="font-semibold text-neutral-800 dark:text-neutral-200">
-                      {mode === 'existing' ? 'Choose one plan to import' : 'Preview each plan'}
-                    </label>
-                    <select
-                      id="plan-import-selection"
-                      value={selectedPlanIndex ?? ''}
-                      disabled={disabled || reading}
-                      onChange={(event) => setSelectedPlanIndex(Number(event.target.value))}
-                      className="mt-2 block w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100">
-                      <option value="" disabled>
-                        Select a plan
-                      </option>
-                      {plans.map((importedPlan, index) => (
-                        <option key={index} value={index}>
-                          {index + 1}.{' '}
-                          {importedPlan.title ||
-                            importedPlan.key ||
-                            importedPlan.sheetName ||
-                            'Untitled plan'}
-                          {importedPlan.title && importedPlan.key ? ` (${importedPlan.key})` : ''}
-                          {' — '}
-                          {importedPlan.days.length}{' '}
-                          {importedPlan.days.length === 1 ? 'day' : 'days'}
-                          {importedPlan.warnings.length ? ' · Needs review' : ''}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-2 leading-6 text-neutral-600 dark:text-neutral-400">
-                      {mode === 'existing'
-                        ? 'Only the selected plan’s days will be added to this editor. To create all plans separately, use Import plans on the New Plan page.'
-                        : `All ${plans.length} plans will be kept separate. Review their days here, then confirm titles and descriptions on the next step.`}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -504,9 +440,7 @@ export default function PlanImportDialog({
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
               <Upload className="h-4 w-4" aria-hidden="true" />
               {mode === 'new'
-                ? plans.length > 1
-                  ? `Use ${plans.length} plans`
-                  : 'Use imported days'
+                ? 'Use imported plan'
                 : importMode === 'replace'
                   ? `Replace ${existingDayCount} days`
                   : 'Add imported days'}

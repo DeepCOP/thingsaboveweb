@@ -2,7 +2,6 @@ import Papa from 'papaparse';
 import bible from '../../data/bible-index.json';
 
 export const MAX_IMPORT_DAYS = 365;
-export const MAX_IMPORT_PLANS = 50;
 export const MAX_IMPORT_FILE_MB = 5;
 const MAX_ISSUES = 30;
 
@@ -15,8 +14,6 @@ export type ImportedPlanDay = {
 };
 
 export type ImportedPlan = {
-  /** A label from the file, never a database identifier. */
-  key?: string;
   days: ImportedPlanDay[];
   title?: string;
   description?: string;
@@ -42,8 +39,7 @@ type Column =
   | 'scriptures'
   | 'plan_title'
   | 'plan_description'
-  | 'cover_image'
-  | 'plan_key';
+  | 'cover_image';
 
 const COLUMN_ALIASES: Record<string, Column> = {
   day: 'day_number',
@@ -63,8 +59,6 @@ const COLUMN_ALIASES: Record<string, Column> = {
   plan_description: 'plan_description',
   cover_image: 'cover_image',
   cover_image_url: 'cover_image',
-  plan_key: 'plan_key',
-  plan_id: 'plan_key',
 };
 
 const BOOK_ALIASES: Record<string, string> = {
@@ -136,13 +130,42 @@ function parseScripture(reference: string): string[] | null {
     .trim()
     .replace(/[\u2013\u2014]/g, '-')
     .replace(/\s+/g, ' ');
+  const crossChapterMatch = normalized.match(/^(.+?)\s+(\d+):(\d+)-(\d+):(\d+)$/);
   const match = normalized.match(
     /^(.+?)\s+(\d+(?:-\d+)?)(?::(\d+(?:-\d+)?(?:\s*,\s*\d+(?:-\d+)?)*))?$/,
   );
-  const bookName = normalizeBook(match ? match[1] : normalized);
+  const bookName = normalizeBook(crossChapterMatch?.[1] ?? match?.[1] ?? normalized);
   const canonicalName = BOOK_ALIASES[bookName] ?? bookName;
   const book = bible.find((entry) => normalizeBook(entry.name) === normalizeBook(canonicalName));
   if (!book) return null;
+  if (crossChapterMatch) {
+    const firstChapter = Number(crossChapterMatch[2]);
+    const firstVerse = Number(crossChapterMatch[3]);
+    const lastChapter = Number(crossChapterMatch[4]);
+    const lastVerse = Number(crossChapterMatch[5]);
+    const firstChapterData = book.chapters.find((entry) => entry.chapter === firstChapter);
+    const lastChapterData = book.chapters.find((entry) => entry.chapter === lastChapter);
+    if (
+      !firstChapterData ||
+      !lastChapterData ||
+      lastChapter < firstChapter ||
+      firstVerse < 1 ||
+      firstVerse > firstChapterData.verses ||
+      lastVerse < 1 ||
+      lastVerse > lastChapterData.verses ||
+      (firstChapter === lastChapter && lastVerse < firstVerse)
+    ) {
+      return null;
+    }
+
+    return book.chapters
+      .filter((entry) => entry.chapter >= firstChapter && entry.chapter <= lastChapter)
+      .map((entry) => {
+        const from = entry.chapter === firstChapter ? firstVerse : 1;
+        const to = entry.chapter === lastChapter ? lastVerse : entry.verses;
+        return `${book.name} ${entry.chapter}:${from}${to === from ? '' : `-${to}`}`;
+      });
+  }
   if (!match) return [book.name];
 
   const chapterNumbers = match[2].split('-').map(Number);
@@ -186,7 +209,8 @@ function parseColumns(header: unknown[]) {
     const label = String(value)
       .replace(/^\uFEFF/, '')
       .trim();
-    const column = COLUMN_ALIASES[label.toLowerCase().replace(/[\s-]+/g, '_')];
+    const normalizedLabel = label.toLowerCase().replace(/[\s-]+/g, '_');
+    const column = COLUMN_ALIASES[normalizedLabel];
     if (!column) ignoredColumns.push(label);
     else if (columns.has(column))
       issues.push(`Header row: more than one column maps to "${column}". Keep only one.`);
@@ -201,8 +225,7 @@ function parseColumns(header: unknown[]) {
   return { columns, ignoredColumns };
 }
 
-/** Validate a grouped plan while retaining its original spreadsheet row numbers. */
-function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): ImportedPlan {
+export function parsePlanRows(rows: unknown[][]): ImportedPlan {
   const headerIndex = rows.findIndex((row) => row.some((value) => !isBlank(value)));
   if (headerIndex === -1)
     throw new PlanImportError(['The file is empty. Add a header row and at least one day.']);
@@ -233,7 +256,7 @@ function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): Im
 
   for (let index = headerIndex + 1; index < rows.length; index++) {
     const row = rows[index];
-    const rowNumber = sourceRowNumbers?.[index] ?? index + 1;
+    const rowNumber = index + 1;
     if (row.every(isBlank)) continue;
 
     row.forEach((value, columnIndex) => {
@@ -251,7 +274,7 @@ function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): Im
         addIssue(`Row ${rowNumber}: "${field}" must be ${maxLength} characters or fewer.`);
       if (value && metadata[key] && value !== metadata[key]) {
         addIssue(
-          `Row ${rowNumber}: "${field}" differs from an earlier row in this plan. Use a different plan_key for a separate plan.`,
+          `Row ${rowNumber}: "${field}" differs from an earlier row. Use one consistent value per file.`,
         );
       } else if (value) {
         metadata[key] = value;
@@ -302,7 +325,7 @@ function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): Im
       if (parsed) scriptures.push(...parsed);
       else
         addIssue(
-          `Row ${rowNumber}: invalid scripture "${reference}". Use a book, chapter, or verse reference such as John 3:16-18; separate references with semicolons.`,
+          `Row ${rowNumber}: invalid scripture "${reference}". Use a book, chapter, or verse reference such as John 3:16-18 or Exodus 6:28-7:7; separate references with semicolons.`,
         );
     }
 
@@ -347,9 +370,7 @@ function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): Im
 
   const days = dayRows.map(({ day }) => day).sort((a, b) => a.day_number - b.day_number);
   if (hasDayNumbers && !issues.length && days.some((day, index) => day.day_number !== index + 1)) {
-    addIssue(
-      `Row ${dayRows[0].row}: Day numbers must run from 1 to ${days.length} without gaps within each plan.`,
-    );
+    addIssue(`Row ${dayRows[0].row}: Day numbers must run from 1 to ${days.length} without gaps.`);
   }
   if (issues.length) throw new PlanImportError(issues);
 
@@ -367,136 +388,7 @@ function parseSinglePlanRows(rows: unknown[][], sourceRowNumbers?: number[]): Im
   return { days, ...metadata, warnings };
 }
 
-/** Group rows by plan_key, or by plan_title when no explicit key column exists. */
-export function parsePlansRows(rows: unknown[][]): ImportedPlan[] {
-  const headerIndex = rows.findIndex((row) => row.some((value) => !isBlank(value)));
-  if (headerIndex === -1) {
-    throw new PlanImportError(['The file is empty. Add a header row and at least one day.']);
-  }
-  const header = rows[headerIndex];
-  const { columns } = parseColumns(header);
-  const issues: string[] = [];
-  const valueAt = (row: unknown[], field: Column, rowNumber: number) => {
-    const column = columns.get(field);
-    const value = column === undefined ? undefined : row[column];
-    if (isBlank(value)) return '';
-    if (typeof value === 'string') return value.replace(/\r\n?/g, '\n').trim();
-    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
-    if (issues.length < MAX_ISSUES)
-      issues.push(
-        `Row ${rowNumber}: "${field}" must be text${field === 'plan_key' ? ' or a number' : ''}. Format date cells as text.`,
-      );
-    return '';
-  };
-  const dataRows = rows
-    .slice(headerIndex + 1)
-    .map((row, index) => ({ row, sourceRow: headerIndex + index + 2 }));
-  const hasKeys = columns.has('plan_key');
-  const titles = hasKeys
-    ? []
-    : [
-        ...new Set(
-          dataRows
-            .map(({ row, sourceRow }) => valueAt(row, 'plan_title', sourceRow))
-            .filter(Boolean),
-        ),
-      ];
-  const groups = new Map<string, { key?: string; rows: unknown[][]; sourceRows: number[] }>();
-  let currentKey = titles.length === 1 ? titles[0] : '';
-
-  for (const { row, sourceRow } of dataRows) {
-    if (row.every(isBlank)) continue;
-    row.forEach((value, columnIndex) => {
-      if (!isBlank(value) && isBlank(header[columnIndex]) && issues.length < MAX_ISSUES) {
-        issues.push(`Row ${sourceRow}: column ${columnIndex + 1} has data but no header.`);
-      }
-    });
-    const hasDay = (['day_number', 'title', 'content', 'scriptures'] as const).some((field) => {
-      const column = columns.get(field);
-      return column !== undefined && !isBlank(row[column]);
-    });
-    const title = valueAt(row, 'plan_title', sourceRow);
-    const descriptionColumn = columns.get('plan_description');
-    const hasDescription = descriptionColumn !== undefined && !isBlank(row[descriptionColumn]);
-    const coverColumn = columns.get('cover_image');
-    const hasCover = coverColumn !== undefined && !isBlank(row[coverColumn]);
-    const key = hasKeys ? valueAt(row, 'plan_key', sourceRow) : title;
-    if (!hasDay && !title && !hasDescription && !hasCover && !key) continue;
-
-    if (hasKeys) {
-      if (hasDay && !key) {
-        if (issues.length < MAX_ISSUES)
-          issues.push(
-            `Row ${sourceRow}: fill "plan_key" on every day row so each day belongs to the correct plan.`,
-          );
-        continue;
-      }
-      if (key) currentKey = key;
-      if (!currentKey) {
-        if (issues.length < MAX_ISSUES)
-          issues.push(`Row ${sourceRow}: add "plan_key" to identify this plan.`);
-        continue;
-      }
-    } else if (titles.length > 1) {
-      if (title) currentKey = title;
-      if (!currentKey) {
-        if (issues.length < MAX_ISSUES)
-          issues.push(
-            `Row ${sourceRow}: add "plan_title" or a "plan_key" column to identify the first plan.`,
-          );
-        continue;
-      }
-    }
-
-    let group = groups.get(currentKey);
-    if (!group) {
-      if (groups.size >= MAX_IMPORT_PLANS) {
-        issues.push(`A file can contain at most ${MAX_IMPORT_PLANS} plans.`);
-        break;
-      }
-      group = { key: currentKey || undefined, rows: [header], sourceRows: [headerIndex + 1] };
-      groups.set(currentKey, group);
-    }
-    group.rows.push(row);
-    group.sourceRows.push(sourceRow);
-  }
-  if (issues.length) throw new PlanImportError(issues);
-  if (!groups.size) {
-    throw new PlanImportError([
-      'No days were found. Add at least one row with a day title, content, or scripture.',
-    ]);
-  }
-
-  const plans: ImportedPlan[] = [];
-  for (const group of groups.values()) {
-    try {
-      const plan = parseSinglePlanRows(group.rows, group.sourceRows);
-      plans.push({ ...plan, ...(group.key ? { key: group.key } : {}) });
-    } catch (error) {
-      if (!(error instanceof PlanImportError)) throw error;
-      issues.push(
-        ...error.issues.map((issue) => (group.key ? `Plan "${group.key}": ${issue}` : issue)),
-      );
-    }
-  }
-  if (issues.length) throw new PlanImportError(issues);
-  return plans;
-}
-
-function requireSinglePlan(plans: ImportedPlan[]): ImportedPlan {
-  if (plans.length !== 1) {
-    throw new PlanImportError([
-      `This file contains ${plans.length} plans. Use the multiple-plan importer or select one plan to import its days.`,
-    ]);
-  }
-  return plans[0];
-}
-
-export function parsePlanRows(rows: unknown[][]): ImportedPlan {
-  return requireSinglePlan(parsePlansRows(rows));
-}
-
-export function parsePlansCsv(text: string): ImportedPlan[] {
+export function parsePlanCsv(text: string): ImportedPlan {
   if (text.includes('\0'))
     throw new PlanImportError(['Save the file as UTF-8 CSV, then try again.']);
   const result = Papa.parse<string[]>(text.replace(/^\uFEFF/, ''), {
@@ -513,14 +405,10 @@ export function parsePlansCsv(text: string): ImportedPlan[] {
       ),
     );
   }
-  return parsePlansRows(result.data);
+  return parsePlanRows(result.data);
 }
 
-export function parsePlanCsv(text: string): ImportedPlan {
-  return requireSinglePlan(parsePlansCsv(text));
-}
-
-export async function parsePlansFile(file: File): Promise<ImportedPlan[]> {
+export async function parsePlanFile(file: File): Promise<ImportedPlan> {
   const extension = file.name.split('.').pop()?.toLowerCase();
   if (extension !== 'csv' && extension !== 'xlsx') {
     throw new PlanImportError([
@@ -533,55 +421,40 @@ export async function parsePlansFile(file: File): Promise<ImportedPlan[]> {
   if (!file.size) throw new PlanImportError(['The file is empty.']);
 
   try {
-    if (extension === 'csv') return parsePlansCsv(await file.text());
+    if (extension === 'csv') return parsePlanCsv(await file.text());
     const { default: readWorkbook } = await import('read-excel-file/browser');
     const sheets = await readWorkbook(await file.arrayBuffer());
     const daysSheet = sheets.find((entry) => entry.sheet.trim().toLowerCase() === 'days');
-    const selectedSheets = daysSheet
-      ? [daysSheet]
-      : sheets.filter(
-          (entry) =>
-            entry.sheet.trim().toLowerCase() !== 'instructions' &&
-            entry.data.some((row) => row.some((value) => !isBlank(value))),
-        );
-    if (!selectedSheets.length)
+    const contentSheets = sheets.filter(
+      (entry) =>
+        entry.sheet.trim().toLowerCase() !== 'instructions' &&
+        entry.data.some((row) => row.some((value) => !isBlank(value))),
+    );
+    if (!contentSheets.length)
       throw new PlanImportError(['The workbook does not contain a worksheet with plan days.']);
-    const plans: ImportedPlan[] = [];
-    const issues: string[] = [];
-    for (const sheet of selectedSheets) {
-      try {
-        const sheetPlans = parsePlansRows(sheet.data);
-        for (const plan of sheetPlans) {
-          plan.sheetName = sheet.sheet;
-          if (!daysSheet && !plan.title) plan.title = sheet.sheet;
-          if (daysSheet && sheets.length > 1) {
-            plan.warnings.unshift(
-              `Only the "${sheet.sheet}" worksheet will be imported. It can contain multiple plans grouped by plan_key.`,
-            );
-          }
-          plans.push(plan);
-        }
-      } catch (error) {
-        if (!(error instanceof PlanImportError)) throw error;
-        issues.push(...error.issues.map((issue) => `Worksheet "${sheet.sheet}": ${issue}`));
-      }
-      if (plans.length > MAX_IMPORT_PLANS) {
-        issues.push(`A file can contain at most ${MAX_IMPORT_PLANS} plans across all worksheets.`);
-        break;
-      }
+    if (contentSheets.length > 1) {
+      throw new PlanImportError([
+        'This workbook contains more than one populated worksheet. Keep one plan in a single Days worksheet and import one plan per file.',
+      ]);
     }
-    if (issues.length) throw new PlanImportError(issues);
-    return plans;
+    const sheet = daysSheet ?? contentSheets[0];
+    try {
+      const plan = parsePlanRows(sheet.data);
+      plan.sheetName = sheet.sheet;
+      if (!daysSheet && !plan.title) plan.title = sheet.sheet;
+      return plan;
+    } catch (error) {
+      if (!(error instanceof PlanImportError)) throw error;
+      throw new PlanImportError(
+        error.issues.map((issue) => `Worksheet "${sheet.sheet}": ${issue}`),
+      );
+    }
   } catch (error) {
     if (error instanceof PlanImportError) throw error;
     throw new PlanImportError([
       'The file could not be read. Make sure it is an unencrypted .xlsx workbook or a UTF-8 CSV file.',
     ]);
   }
-}
-
-export async function parsePlanFile(file: File): Promise<ImportedPlan> {
-  return requireSinglePlan(await parsePlansFile(file));
 }
 
 function toEditorHtml(text: string) {

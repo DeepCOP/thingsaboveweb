@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { saveDevotionalDraft } from '../api/mutations';
-import { DevotionalDayInput } from '../types/types';
 import type { DevotionalDayInput } from '../types/types';
 
 export function useSaveDevotionalDraft(planId: string) {

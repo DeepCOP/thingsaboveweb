@@ -90,10 +90,17 @@ export default function MyPlansPage() {
             </p>
           </div>
           {session && (
-            <Link href="/plans/new" className={`${primaryActionClass} shrink-0 self-start`}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              New plan
-            </Link>
+            <div className="flex flex-wrap gap-3 self-start">
+              <Link
+                href="/plans/new?import=1"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-emerald-700 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 dark:border-emerald-500 dark:text-emerald-300 dark:hover:bg-emerald-950 dark:focus-visible:ring-offset-neutral-950">
+                Import a plan
+              </Link>
+              <Link href="/plans/new" className={primaryActionClass}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                New plan
+              </Link>
+            </div>
           )}
         </header>
 
@@ -131,10 +138,17 @@ export default function MyPlansPage() {
           <LibraryEmptyState
             title="Your next plan starts here"
             description="A passage, a reflection, a few words of encouragement. Turn your inspiration into a plan, one day at a time.">
-            <Link href="/plans/new" className={primaryActionClass}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Create your first plan
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/plans/new" className={primaryActionClass}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Create your first plan
+              </Link>
+              <Link
+                href="/plans/new?import=1"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-emerald-700 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 dark:border-emerald-500 dark:text-emerald-300 dark:hover:bg-emerald-950 dark:focus-visible:ring-offset-neutral-950">
+                Import a plan
+              </Link>
+            </div>
           </LibraryEmptyState>
         ) : (
           <>

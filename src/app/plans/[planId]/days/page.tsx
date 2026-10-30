@@ -129,9 +129,7 @@ export default function PlanDaysPage() {
     return nextDays.map((day, index) => ({ ...day, day_number: index + 1 }));
   }
 
-  function importDays(plans: ImportedPlan[], mode: 'append' | 'replace') {
-    if (plans.length !== 1) throw new Error('Choose one plan to import into this editor.');
-    const plan = plans[0];
+  function importDays(plan: ImportedPlan, mode: 'append' | 'replace') {
     const nextCount = (mode === 'append' ? days.length : 0) + plan.days.length;
     if (nextCount > MAX_IMPORT_DAYS) {
       throw new Error(

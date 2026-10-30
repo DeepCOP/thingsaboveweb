@@ -8,7 +8,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { saveDevotionalDraft } from '@/src/api/mutations';
 import PlanImportDialog from '@/src/components/PlanImportDialog';
-import PlanBatchImport from '@/src/components/PlanBatchImport';
 import ImportedCoverPreview from '@/src/components/ImportedCoverPreview';
 import { useCreateDevotionalPlan, usePlanTags } from '@/src/hooks/useDevotionalPlan';
 import { createImportedDays, ImportedPlan, MAX_IMPORT_DAYS } from '@/src/lib/planImport';
@@ -36,7 +35,6 @@ export default function CreatePlanPage() {
     null,
   );
   const [openImportOnLoad, setOpenImportOnLoad] = useState(false);
-  const [batchPlans, setBatchPlans] = useState<ImportedPlan[] | null>(null);
   const [createdPlanId, setCreatedPlanId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -62,13 +60,7 @@ export default function CreatePlanPage() {
     };
   }, [coverPreview]);
 
-  function importPlan(plans: ImportedPlan[]) {
-    if (plans.length > 1) {
-      setBatchPlans(plans);
-      return;
-    }
-    const plan = plans[0];
-    if (!plan) throw new Error('Choose at least one plan to import.');
+  function importPlan(plan: ImportedPlan) {
     const nextDays = createImportedDays(plan.days);
     setImportedDays(nextDays);
     setTotalDays(nextDays.length);
@@ -173,20 +165,6 @@ export default function CreatePlanPage() {
     }
   }
 
-  if (batchPlans) {
-    return (
-      <PlanBatchImport
-        plans={batchPlans}
-        initialVisibility={visibility}
-        initialTags={selectedTags}
-        onBack={() => {
-          setBatchPlans(null);
-          setOpenImportOnLoad(false);
-        }}
-      />
-    );
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center px-4 mb-20">
       <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:bg-black">
@@ -205,17 +183,17 @@ export default function CreatePlanPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-semibold text-indigo-950 dark:text-indigo-100">
-                Have plans in a spreadsheet?
+                Have a plan in a spreadsheet?
               </h2>
               <p className="mt-1 text-sm text-indigo-800 dark:text-indigo-200">
-                Import one or more plans from Excel or CSV, then review their details.
+                Import one plan from Excel or CSV, then review its details.
               </p>
             </div>
             <PlanImportDialog
               onImport={importPlan}
               defaultOpen={openImportOnLoad}
               disabled={isSubmitting || !!createdPlanId}
-              triggerLabel={importedDays ? 'Choose another file' : 'Import plans'}
+              triggerLabel={importedDays ? 'Choose another file' : 'Import plan'}
             />
           </div>
           {importedDays && (
