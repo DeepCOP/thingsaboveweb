@@ -62,8 +62,8 @@ export default function CreatePlanPage() {
 
   function importPlan(plan: ImportedPlan) {
     const nextDays = createImportedDays(plan.days);
-    setImportedDays(nextDays);
-    setTotalDays(nextDays.length);
+    setImportedDays(nextDays.length ? nextDays : null);
+    setTotalDays(Math.max(nextDays.length, 1));
     setTitle((current) => (current.trim() ? current : (plan.title ?? current)));
     setDescription((current) => (current.trim() ? current : (plan.description ?? current)));
     setImportedCoverUrl(plan.coverImage ?? null);
