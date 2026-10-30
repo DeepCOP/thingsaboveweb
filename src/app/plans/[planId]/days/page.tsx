@@ -15,6 +15,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, Copy, Menu, Trash2 } from 'lucide-react';
 
 import ScriptureSelector from '@/src/components/ScriptureSelector';
+import PlanImportDialog from '@/src/components/PlanImportDialog';
 import RichTextEditor from '@/src/components/editor/RichTextEditor';
 import Spinner from '@/src/components/ui/Spinner';
 import { Checkbox } from '@/src/components/ui/checkbox';
@@ -28,6 +29,7 @@ import {
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { useAuth } from '@/src/state/AuthContext';
 import { PlanSubmission } from '@/src/types/types';
+import { createImportedDays, ImportedPlan, MAX_IMPORT_DAYS } from '@/src/lib/planImport';
 
 type Day = {
   id: string;
@@ -95,6 +97,7 @@ export default function PlanDaysPage() {
   const [openDays, setOpenDays] = useState<string[]>([]);
   const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
   const latestSubmission = latestSubmissionQuery.data ?? null;
   const scriptureFocusedPlanLabel = getScriptureFocusedPlanLabel(planQuery.data?.tags);
   const isScriptureFocusedPlan = scriptureFocusedPlanLabel !== null;
@@ -124,6 +127,24 @@ export default function PlanDaysPage() {
 
   function normalizeDays(nextDays: Day[]): Day[] {
     return nextDays.map((day, index) => ({ ...day, day_number: index + 1 }));
+  }
+
+  function importDays(plan: ImportedPlan, mode: 'append' | 'replace') {
+    const nextCount = (mode === 'append' ? days.length : 0) + plan.days.length;
+    if (nextCount > MAX_IMPORT_DAYS) {
+      throw new Error(
+        `A plan can contain up to ${MAX_IMPORT_DAYS} days. Choose Replace or import fewer days.`,
+      );
+    }
+
+    const importedDays = createImportedDays(plan.days, mode === 'append' ? days.length + 1 : 1);
+    initializedRef.current = true;
+    setDays(mode === 'append' ? [...days, ...importedDays] : importedDays);
+    if (mode === 'replace') setOpenDays([]);
+    setSubmissionError(null);
+    setImportMessage(
+      `${importedDays.length} ${importedDays.length === 1 ? 'day imported' : 'days imported'}. Review the content below, then choose Save Draft to keep these changes.`,
+    );
   }
 
   function removeDay(index: number) {
@@ -212,6 +233,7 @@ export default function PlanDaysPage() {
 
     submitDevotionals.mutate(payload, {
       onSuccess: (submission) => {
+        setImportMessage(null);
         latestSubmissionQuery.refetch();
         alert(
           submission
@@ -357,6 +379,32 @@ export default function PlanDaysPage() {
         </p>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-900">
+        <div>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">
+            Import days from a spreadsheet
+          </h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            Append Excel or CSV days, or replace the current draft after reviewing the file.
+          </p>
+        </div>
+        <PlanImportDialog
+          mode="existing"
+          existingDayCount={days.length}
+          disabled={isLoading || !planQuery.data || draftsQuery.isError || devotionalDays.isError}
+          onImport={importDays}
+          triggerLabel="Import days"
+        />
+      </div>
+
+      {importMessage && (
+        <p
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
+          {importMessage}
+        </p>
+      )}
+
       <SubmissionStatusCard
         latestSubmission={latestSubmission}
         isPublished={planQuery.data?.status === 'published'}
@@ -498,10 +546,15 @@ export default function PlanDaysPage() {
           onClick={() =>
             saveDraft.mutate(normalizeDays(days), {
               onSuccess: () => {
+                setImportMessage(null);
+                setSubmissionError(null);
                 alert('Draft saved.');
               },
               onError: (error) => {
                 console.log(error);
+                setSubmissionError(
+                  'The draft could not be saved. Your changes are still in the editor. Please try Save Draft again before leaving.',
+                );
               },
             })
           }
