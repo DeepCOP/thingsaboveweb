@@ -37,6 +37,8 @@ type Day = {
   title: string;
 };
 
+const MAX_PLAN_DAYS = 1095;
+
 const SCRIPTURE_FOCUSED_PLAN_TAG_LABELS: Record<string, string> = {
   reading: 'Reading',
   memorization: 'Memorization',
@@ -134,23 +136,46 @@ export default function PlanDaysPage() {
     }
   }
 
-  function duplicateDay(index: number) {
-    const sourceDay = days[index];
-    if (!sourceDay) return;
-
-    const duplicatedDay: Day = {
-      ...sourceDay,
-      id: crypto.randomUUID(),
-      scriptures: [...sourceDay.scriptures],
-    };
+  function addDay() {
+    if (days.length >= MAX_PLAN_DAYS) {
+      alert(`A devotional plan cannot have more than ${MAX_PLAN_DAYS} days.`);
+      return;
+    }
 
     setDays((prev) =>
-      normalizeDays([...prev.slice(0, index + 1), duplicatedDay, ...prev.slice(index + 1)]),
+      prev.length >= MAX_PLAN_DAYS ? prev : [...prev, createEmptyDay(prev.length + 1)],
     );
+  }
+
+  function duplicateDay(index: number) {
+    if (days.length >= MAX_PLAN_DAYS) {
+      alert(`A devotional plan cannot have more than ${MAX_PLAN_DAYS} days.`);
+      return;
+    }
+
+    setDays((prev) => {
+      if (prev.length >= MAX_PLAN_DAYS) return prev;
+
+      const sourceDay = prev[index];
+      if (!sourceDay) return prev;
+
+      const duplicatedDay: Day = {
+        ...sourceDay,
+        id: crypto.randomUUID(),
+        scriptures: [...sourceDay.scriptures],
+      };
+
+      return normalizeDays([...prev.slice(0, index + 1), duplicatedDay, ...prev.slice(index + 1)]);
+    });
   }
 
   async function submitDays() {
     setSubmissionError(null);
+
+    if (days.length > MAX_PLAN_DAYS) {
+      setSubmissionError(`A devotional plan cannot have more than ${MAX_PLAN_DAYS} days.`);
+      return;
+    }
 
     const preparedDays = normalizeDays(days).map((day) => ({
       day_number: day.day_number,
@@ -473,8 +498,10 @@ export default function PlanDaysPage() {
 
       <div className="flex flex-wrap justify-between gap-3 pt-6">
         <button
-          onClick={() => setDays((prev) => [...prev, createEmptyDay(prev.length + 1)])}
-          className="rounded-full border px-6 py-3">
+          onClick={addDay}
+          disabled={days.length >= MAX_PLAN_DAYS}
+          title={days.length >= MAX_PLAN_DAYS ? `${MAX_PLAN_DAYS}-day limit reached` : undefined}
+          className="rounded-full border px-6 py-3 disabled:cursor-not-allowed disabled:opacity-50">
           + Add Day
         </button>
 
@@ -702,8 +729,11 @@ function SortableAccordionDay({
                 duplicateDay(currentIndex);
               }}
               aria-label={`Duplicate Day ${day.day_number}`}
-              title="Duplicate day"
-              className="text-sm text-gray-500 transition hover:text-gray-700">
+              title={
+                daysLength >= MAX_PLAN_DAYS ? `${MAX_PLAN_DAYS}-day limit reached` : 'Duplicate day'
+              }
+              disabled={daysLength >= MAX_PLAN_DAYS}
+              className="text-sm text-gray-500 transition hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
               <Copy />
             </button>
           )}

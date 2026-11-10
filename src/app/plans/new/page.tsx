@@ -33,7 +33,7 @@ export default function CreatePlanPage() {
 
   const TITLE_MAX = 120;
   const DESCRIPTION_MAX = 500;
-  const MAX_DAYS = 365;
+  const MAX_DAYS = 1095;
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
