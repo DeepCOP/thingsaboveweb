@@ -60,6 +60,31 @@ export async function createDevotionalPlan(payload: DevotionalPlanInsert) {
   if (error) throw error;
 }
 
+/** A batch retains its generated IDs when retrying an uncertain network response. */
+export async function createImportedDevotionalPlan(payload: DevotionalPlanInsert) {
+  try {
+    await createDevotionalPlan(payload);
+  } catch (error) {
+    if (
+      !payload.id ||
+      !payload.author_id ||
+      !error ||
+      typeof error !== 'object' ||
+      !('code' in error) ||
+      error.code !== '23505'
+    )
+      throw error;
+
+    const { data, error: lookupError } = await supabase
+      .from('devotional_plans')
+      .select('id')
+      .eq('id', payload.id)
+      .eq('author_id', payload.author_id)
+      .maybeSingle();
+    if (lookupError || !data) throw error;
+  }
+}
+
 export const saveDevotionalDraft = async (days: DevotionalDayInput[], planId: string) => {
   if (!planId) return;
 
