@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/src/state/AuthContext';
+import { IDEAS_DISCUSSIONS_URL } from '@/src/lib/links';
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -105,6 +106,14 @@ export default function Navigation() {
               className="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
               Community
             </button>
+            <a
+              href={IDEAS_DISCUSSIONS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Ideas on GitHub (opens in a new tab)"
+              className="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
+              Ideas
+            </a>
             <button
               onClick={() => navigateToSection('download')}
               className="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
@@ -211,6 +220,15 @@ export default function Navigation() {
                   className="px-3 py-2.5 text-left text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
                   Community
                 </button>
+                <a
+                  href={IDEAS_DISCUSSIONS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ideas on GitHub (opens in a new tab)"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-3 py-2.5 text-left text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
+                  Ideas
+                </a>
                 <button
                   type="button"
                   onClick={() => {

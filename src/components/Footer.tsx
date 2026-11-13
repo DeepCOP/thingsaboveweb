@@ -2,6 +2,7 @@
 
 import { BookOpen, Github, Instagram, Twitter } from 'lucide-react';
 import Link from 'next/link';
+import { IDEAS_DISCUSSIONS_URL } from '@/src/lib/links';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -37,9 +38,11 @@ export default function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="#"
+                href={IDEAS_DISCUSSIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400"
-                aria-label="Github">
+                aria-label="GitHub Ideas (opens in a new tab)">
                 <Github className="h-5 w-5" />
               </a>
             </div>
@@ -69,6 +72,16 @@ export default function Footer() {
                   href="#community"
                   className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400">
                   Community
+                </a>
+              </li>
+              <li>
+                <a
+                  href={IDEAS_DISCUSSIONS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share an idea on GitHub (opens in a new tab)"
+                  className="text-neutral-600 transition-colors hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400">
+                  Share an idea
                 </a>
               </li>
               <li>
