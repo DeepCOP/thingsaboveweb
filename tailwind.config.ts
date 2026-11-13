@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       screens: {
-        nav: '850px',
+        nav: '900px',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
