@@ -42,6 +42,7 @@ const SCRIPTURE_FOCUSED_PLAN_TAG_LABELS: Record<string, string> = {
   reading: 'Reading',
   memorization: 'Memorization',
 };
+const DAYS_PER_PAGE = 50;
 
 function getScriptureFocusedPlanLabel(tags: string[] | null | undefined) {
   for (const tag of tags ?? []) {
@@ -93,6 +94,7 @@ export default function PlanDaysPage() {
   }, [planQuery.data]);
 
   const [days, setDays] = useState<Day[]>(daysData);
+  const [currentPage, setCurrentPage] = useState(1);
   const [openDays, setOpenDays] = useState<string[]>([]);
   const [hasAcceptedContentStandards, setHasAcceptedContentStandards] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -103,6 +105,9 @@ export default function PlanDaysPage() {
     latestSubmission?.status === 'submitted' || latestSubmission?.status === 'screening';
   const hasApprovedSubmission = latestSubmission?.status === 'approved';
   const isPrivatePlan = planVisibility === 'private';
+  const totalPages = Math.max(1, Math.ceil(days.length / DAYS_PER_PAGE));
+  const pageStartIndex = (currentPage - 1) * DAYS_PER_PAGE;
+  const visibleDays = days.slice(pageStartIndex, pageStartIndex + DAYS_PER_PAGE);
 
   const isLoading =
     submitDevotionals.isPending ||
@@ -141,9 +146,11 @@ export default function PlanDaysPage() {
       return;
     }
 
+    const nextDaysCount = days.length + 1;
     setDays((prev) =>
       prev.length >= MAX_PLAN_DAYS ? prev : [...prev, createEmptyDay(prev.length + 1)],
     );
+    setCurrentPage(Math.ceil(nextDaysCount / DAYS_PER_PAGE));
   }
 
   function duplicateDay(index: number) {
@@ -166,6 +173,7 @@ export default function PlanDaysPage() {
 
       return normalizeDays([...prev.slice(0, index + 1), duplicatedDay, ...prev.slice(index + 1)]);
     });
+    setCurrentPage(Math.floor((index + 1) / DAYS_PER_PAGE) + 1);
   }
 
   async function submitDays() {
@@ -332,6 +340,10 @@ export default function PlanDaysPage() {
     initializedRef.current = true;
   }, [daysData, devotionalDays.data, drafts, draftsQuery.isLoading, planQuery.data]);
 
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
   if (sessionLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -392,69 +404,95 @@ export default function PlanDaysPage() {
           <Spinner size="lg" />
         </div>
       ) : (
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={({ active, over }) => {
-            if (!over || active.id === over.id) return;
+        <div className="space-y-4">
+          <DaysPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalDays={days.length}
+            pageStartIndex={pageStartIndex}
+            visibleDaysCount={visibleDays.length}
+            onPageChange={setCurrentPage}
+          />
 
-            setDays((prev) => {
-              const oldIndex = prev.findIndex((day) => day.id === active.id);
-              const newIndex = prev.findIndex((day) => day.id === over.id);
-              return normalizeDays(arrayMove(prev, oldIndex, newIndex));
-            });
-          }}>
-          <SortableContext items={days.map((day) => day.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-4">
-              {days.map((day, index) => (
-                <SortableAccordionDay
-                  key={day.id}
-                  day={day}
-                  isOpen={openDays.includes(day.id)}
-                  onToggle={() => toggleDay(day.id)}
-                  daysLength={days.length}
-                  removeDay={removeDay}
-                  duplicateDay={duplicateDay}
-                  currentIndex={index}>
-                  <input
-                    type="text"
-                    placeholder="Day title (optional)"
-                    value={day.title ?? ''}
-                    maxLength={DAY_TITLE_MAX}
-                    onChange={(e) => updateDay(index, { title: e.target.value })}
-                    className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <p className="text-xs text-gray-500">
-                    {(day.title ?? '').length}/{DAY_TITLE_MAX}
-                  </p>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={({ active, over }) => {
+              if (!over || active.id === over.id) return;
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        {isScriptureFocusedPlan
-                          ? 'Devotional notes (optional)'
-                          : 'Devotional content'}
+              setDays((prev) => {
+                const oldIndex = prev.findIndex((day) => day.id === active.id);
+                const newIndex = prev.findIndex((day) => day.id === over.id);
+                return normalizeDays(arrayMove(prev, oldIndex, newIndex));
+              });
+            }}>
+            <SortableContext
+              items={visibleDays.map((day) => day.id)}
+              strategy={verticalListSortingStrategy}>
+              <div className="space-y-4">
+                {visibleDays.map((day, index) => {
+                  const dayIndex = pageStartIndex + index;
+
+                  return (
+                    <SortableAccordionDay
+                      key={day.id}
+                      day={day}
+                      isOpen={openDays.includes(day.id)}
+                      onToggle={() => toggleDay(day.id)}
+                      daysLength={days.length}
+                      removeDay={removeDay}
+                      duplicateDay={duplicateDay}
+                      currentIndex={dayIndex}>
+                      <input
+                        type="text"
+                        placeholder="Day title (optional)"
+                        value={day.title ?? ''}
+                        maxLength={DAY_TITLE_MAX}
+                        onChange={(e) => updateDay(dayIndex, { title: e.target.value })}
+                        className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {(day.title ?? '').length}/{DAY_TITLE_MAX}
                       </p>
-                      {isScriptureFocusedPlan && (
-                        <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-                          {scriptureFocusedPlanLabel} tag
-                        </span>
-                      )}
-                    </div>
-                    <RichTextEditor
-                      value={day.content}
-                      onChange={(html) => updateDay(index, { content: html })}
-                    />
-                  </div>
 
-                  <ScriptureSelector
-                    value={day.scriptures}
-                    onChange={(refs) => updateDay(index, { scriptures: refs })}
-                  />
-                </SortableAccordionDay>
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                            {isScriptureFocusedPlan
+                              ? 'Devotional notes (optional)'
+                              : 'Devotional content'}
+                          </p>
+                          {isScriptureFocusedPlan && (
+                            <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+                              {scriptureFocusedPlanLabel} tag
+                            </span>
+                          )}
+                        </div>
+                        <RichTextEditor
+                          value={day.content}
+                          onChange={(html) => updateDay(dayIndex, { content: html })}
+                        />
+                      </div>
+
+                      <ScriptureSelector
+                        value={day.scriptures}
+                        onChange={(refs) => updateDay(dayIndex, { scriptures: refs })}
+                      />
+                    </SortableAccordionDay>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          <DaysPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalDays={days.length}
+            pageStartIndex={pageStartIndex}
+            visibleDaysCount={visibleDays.length}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       )}
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
@@ -537,6 +575,67 @@ export default function PlanDaysPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+function DaysPagination({
+  currentPage,
+  totalPages,
+  totalDays,
+  pageStartIndex,
+  visibleDaysCount,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalDays: number;
+  pageStartIndex: number;
+  visibleDaysCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalDays <= DAYS_PER_PAGE) return null;
+
+  return (
+    <nav
+      aria-label="Devotional days pagination"
+      className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 dark:bg-gray-800">
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        Days {pageStartIndex + 1}-{pageStartIndex + visibleDaysCount} of {totalDays}
+      </p>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50">
+          Previous
+        </button>
+
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+          Page
+          <select
+            value={currentPage}
+            onChange={(event) => onPageChange(Number(event.target.value))}
+            className="rounded-lg border border-gray-300 bg-white px-2 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <option key={page} value={page}>
+                {page}
+              </option>
+            ))}
+          </select>
+          of {totalPages}
+        </label>
+
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50">
+          Next
+        </button>
+      </div>
+    </nav>
   );
 }
 
