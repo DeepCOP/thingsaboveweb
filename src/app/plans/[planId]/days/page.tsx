@@ -26,6 +26,7 @@ import {
   useSubmitDevotionalPlanForScreening,
 } from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
+import { MAX_PLAN_DAYS } from '@/src/lib/constants';
 import { useAuth } from '@/src/state/AuthContext';
 import { PlanSubmission } from '@/src/types/types';
 
@@ -36,8 +37,6 @@ type Day = {
   scriptures: string[];
   title: string;
 };
-
-const MAX_PLAN_DAYS = 1095;
 
 const SCRIPTURE_FOCUSED_PLAN_TAG_LABELS: Record<string, string> = {
   reading: 'Reading',

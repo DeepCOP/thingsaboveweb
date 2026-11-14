@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useCreateDevotionalPlan, usePlanTags } from '@/src/hooks/useDevotionalPlan';
+import { MAX_PLAN_DAYS } from '@/src/lib/constants';
 import {
   MAX_PLAN_COVER_IMAGE_MB,
   isPlanCoverImageTooLarge,
@@ -33,8 +34,6 @@ export default function CreatePlanPage() {
 
   const TITLE_MAX = 120;
   const DESCRIPTION_MAX = 500;
-  const MAX_DAYS = 1095;
-
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
@@ -59,8 +58,8 @@ export default function CreatePlanPage() {
       return;
     }
 
-    if (totalDays > MAX_DAYS) {
-      alert(`Number of days cannot exceed ${MAX_DAYS}.`);
+    if (totalDays > MAX_PLAN_DAYS) {
+      alert(`Number of days cannot exceed ${MAX_PLAN_DAYS}.`);
       return;
     }
 
@@ -290,7 +289,7 @@ export default function CreatePlanPage() {
           <input
             type="number"
             min={1}
-            max={MAX_DAYS}
+            max={MAX_PLAN_DAYS}
             className="w-32 rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             value={totalDays}
             required
@@ -300,7 +299,7 @@ export default function CreatePlanPage() {
                 setTotalDays(1);
                 return;
               }
-              setTotalDays(Math.min(Math.max(nextValue, 1), MAX_DAYS));
+              setTotalDays(Math.min(Math.max(nextValue, 1), MAX_PLAN_DAYS));
             }}
           />
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
