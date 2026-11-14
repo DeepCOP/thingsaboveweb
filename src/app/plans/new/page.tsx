@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useCreateDevotionalPlan, usePlanTags } from '@/src/hooks/useDevotionalPlan';
-import { MAX_PLAN_DAYS } from '@/src/lib/constants';
 import {
   MAX_PLAN_COVER_IMAGE_MB,
-  isPlanCoverImageTooLarge,
-  uploadPlanCover,
-} from '@/src/lib/utils';
+  MAX_PLAN_DAYS,
+  MAX_PLAN_DESCRIPTION_LENGTH,
+  MAX_PLAN_TITLE_LENGTH,
+} from '@/src/lib/constants';
+import { isPlanCoverImageTooLarge, uploadPlanCover } from '@/src/lib/utils';
 import { useAuth } from '@/src/state/AuthContext';
 
 export default function CreatePlanPage() {
@@ -32,8 +33,6 @@ export default function CreatePlanPage() {
     isError: hasPlanTagsError,
   } = usePlanTags();
 
-  const TITLE_MAX = 120;
-  const DESCRIPTION_MAX = 500;
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
@@ -48,13 +47,13 @@ export default function CreatePlanPage() {
       return;
     }
 
-    if (title.length > TITLE_MAX) {
-      alert(`Title must be ${TITLE_MAX} characters or fewer.`);
+    if (title.length > MAX_PLAN_TITLE_LENGTH) {
+      alert(`Title must be ${MAX_PLAN_TITLE_LENGTH} characters or fewer.`);
       return;
     }
 
-    if (description.length > DESCRIPTION_MAX) {
-      alert(`Description must be ${DESCRIPTION_MAX} characters or fewer.`);
+    if (description.length > MAX_PLAN_DESCRIPTION_LENGTH) {
+      alert(`Description must be ${MAX_PLAN_DESCRIPTION_LENGTH} characters or fewer.`);
       return;
     }
 
@@ -142,12 +141,12 @@ export default function CreatePlanPage() {
             className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             placeholder="e.g. Walking with God"
             value={title}
-            maxLength={TITLE_MAX}
+            maxLength={MAX_PLAN_TITLE_LENGTH}
             required
             onChange={(e) => setTitle(e.target.value)}
           />
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
-            {title.length}/{TITLE_MAX}
+            {title.length}/{MAX_PLAN_TITLE_LENGTH}
           </p>
         </div>
 
@@ -160,12 +159,12 @@ export default function CreatePlanPage() {
             className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300"
             placeholder="What is this devotional about?"
             value={description}
-            maxLength={DESCRIPTION_MAX}
+            maxLength={MAX_PLAN_DESCRIPTION_LENGTH}
             required
             onChange={(e) => setDescription(e.target.value)}
           />
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
-            {description.length}/{DESCRIPTION_MAX}
+            {description.length}/{MAX_PLAN_DESCRIPTION_LENGTH}
           </p>
         </div>
 

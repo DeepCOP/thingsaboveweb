@@ -26,7 +26,7 @@ import {
   useSubmitDevotionalPlanForScreening,
 } from '@/src/hooks/useDevotionalPlan';
 import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
-import { MAX_PLAN_DAYS } from '@/src/lib/constants';
+import { MAX_PLAN_DAYS, MAX_PLAN_DAY_TITLE_LENGTH } from '@/src/lib/constants';
 import { useAuth } from '@/src/state/AuthContext';
 import { PlanSubmission } from '@/src/types/types';
 
@@ -68,7 +68,6 @@ function createEmptyDay(dayNumber: number): Day {
 }
 
 export default function PlanDaysPage() {
-  const DAY_TITLE_MAX = 120;
   const { planId } = useParams();
   const { session, loading: sessionLoading } = useAuth();
   const planQuery = useGetDevotionalById(planId as string, session?.user?.id);
@@ -446,12 +445,12 @@ export default function PlanDaysPage() {
                         type="text"
                         placeholder="Day title (optional)"
                         value={day.title ?? ''}
-                        maxLength={DAY_TITLE_MAX}
+                        maxLength={MAX_PLAN_DAY_TITLE_LENGTH}
                         onChange={(e) => updateDay(dayIndex, { title: e.target.value })}
                         className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       <p className="text-xs text-gray-500">
-                        {(day.title ?? '').length}/{DAY_TITLE_MAX}
+                        {(day.title ?? '').length}/{MAX_PLAN_DAY_TITLE_LENGTH}
                       </p>
 
                       <div className="space-y-2">
