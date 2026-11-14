@@ -12,9 +12,10 @@ import {
 } from '@/src/hooks/useDevotionalPlan';
 import {
   MAX_PLAN_COVER_IMAGE_MB,
-  isPlanCoverImageTooLarge,
-  uploadPlanCover,
-} from '@/src/lib/utils';
+  MAX_PLAN_DESCRIPTION_LENGTH,
+  MAX_PLAN_TITLE_LENGTH,
+} from '@/src/lib/constants';
+import { isPlanCoverImageTooLarge, uploadPlanCover } from '@/src/lib/utils';
 import Spinner from '@/src/components/ui/Spinner';
 import Image from 'next/image';
 
@@ -43,9 +44,6 @@ export default function EditPlanPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const initializedRef = useRef(false);
-
-  const TITLE_MAX = 120;
-  const DESCRIPTION_MAX = 500;
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -110,13 +108,13 @@ export default function EditPlanPage() {
     visibility === 'public';
 
   const handleSave = async () => {
-    if (title.length > TITLE_MAX) {
-      alert(`Title must be ${TITLE_MAX} characters or fewer.`);
+    if (title.length > MAX_PLAN_TITLE_LENGTH) {
+      alert(`Title must be ${MAX_PLAN_TITLE_LENGTH} characters or fewer.`);
       return;
     }
 
-    if (description.length > DESCRIPTION_MAX) {
-      alert(`Description must be ${DESCRIPTION_MAX} characters or fewer.`);
+    if (description.length > MAX_PLAN_DESCRIPTION_LENGTH) {
+      alert(`Description must be ${MAX_PLAN_DESCRIPTION_LENGTH} characters or fewer.`);
       return;
     }
 
@@ -203,23 +201,23 @@ export default function EditPlanPage() {
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        maxLength={TITLE_MAX}
+        maxLength={MAX_PLAN_TITLE_LENGTH}
         className="w-full border rounded-lg p-3"
         placeholder="Title"
       />
       <p className="text-xs text-gray-500">
-        {title.length}/{TITLE_MAX}
+        {title.length}/{MAX_PLAN_TITLE_LENGTH}
       </p>
 
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        maxLength={DESCRIPTION_MAX}
+        maxLength={MAX_PLAN_DESCRIPTION_LENGTH}
         className="w-full border rounded-lg p-3"
         placeholder="Description"
       />
       <p className="text-xs text-gray-500">
-        {description.length}/{DESCRIPTION_MAX}
+        {description.length}/{MAX_PLAN_DESCRIPTION_LENGTH}
       </p>
 
       <div>
