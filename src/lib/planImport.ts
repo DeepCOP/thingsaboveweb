@@ -237,6 +237,20 @@ export function parsePlanRows(rows: unknown[][]): ImportedPlan {
   const header = rows[headerIndex];
   const { columns, ignoredColumns } = parseColumns(header);
 
+  // Count decoded day records before validating their metadata, content, or scriptures.
+  // Blank rows and rows containing only plan metadata do not contribute to the limit.
+  const dayColumns = (['day_number', 'title', 'content', 'scriptures'] as const)
+    .map((field) => columns.get(field))
+    .filter((index): index is number => index !== undefined);
+  let dayCount = 0;
+  for (let index = headerIndex + 1; index < rows.length; index++) {
+    if (!dayColumns.some((column) => !isBlank(rows[index][column]))) continue;
+    dayCount++;
+    if (dayCount > MAX_IMPORT_DAYS) {
+      throw new PlanImportError([`A plan can contain at most ${MAX_IMPORT_DAYS} days.`]);
+    }
+  }
+
   const dayRows: { day: ImportedPlanDay; row: number; number: string }[] = [];
   const metadata: { title?: string; description?: string; coverImage?: string } = {};
   const warnings: string[] = [];
@@ -334,10 +348,6 @@ export function parsePlanRows(rows: unknown[][]): ImportedPlan {
       number,
       day: { day_number: 0, title, content, scriptures: [...new Set(scriptures)] },
     });
-    if (dayRows.length > MAX_IMPORT_DAYS) {
-      addIssue(`A plan can contain at most ${MAX_IMPORT_DAYS} days.`);
-      break;
-    }
   }
 
   // if (!dayRows.length) {
