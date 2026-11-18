@@ -1,13 +1,11 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { MAX_PLAN_COVER_IMAGE_BYTES, MAX_PLAN_COVER_IMAGE_MB } from './constants';
 import supabase from './supabaseClient';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const MAX_PLAN_COVER_IMAGE_MB = 5;
-export const MAX_PLAN_COVER_IMAGE_BYTES = MAX_PLAN_COVER_IMAGE_MB * 1024 * 1024;
 
 export function isPlanCoverImageTooLarge(file: File) {
   return file.size > MAX_PLAN_COVER_IMAGE_BYTES;
