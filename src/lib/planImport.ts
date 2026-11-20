@@ -1,8 +1,7 @@
 import Papa from 'papaparse';
 import bible from '../../data/bible-index.json';
 import { MAX_PLAN_DAYS } from './constants';
-
-export const MAX_IMPORT_FILE_MB = 5;
+const MAX_IMPORT_FILE_MB = 5;
 const MAX_ISSUES = 30;
 
 export type ImportedPlanDay = {
