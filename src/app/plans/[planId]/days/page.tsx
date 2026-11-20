@@ -30,7 +30,7 @@ import { useSaveDevotionalDraft } from '@/src/hooks/useSaveDraft';
 import { MAX_PLAN_DAYS, MAX_PLAN_DAY_TITLE_LENGTH } from '@/src/lib/constants';
 import { useAuth } from '@/src/state/AuthContext';
 import { PlanSubmission } from '@/src/types/types';
-import { createImportedDays, ImportedPlan, MAX_IMPORT_DAYS } from '@/src/lib/planImport';
+import { createImportedDays, ImportedPlan } from '@/src/lib/planImport';
 
 type Day = {
   id: string;
@@ -131,9 +131,9 @@ export default function PlanDaysPage() {
 
   function importDays(plan: ImportedPlan, mode: 'append' | 'replace') {
     const nextCount = (mode === 'append' ? days.length : 0) + plan.days.length;
-    if (nextCount > MAX_IMPORT_DAYS) {
+    if (nextCount > MAX_PLAN_DAYS) {
       throw new Error(
-        `A plan can contain up to ${MAX_IMPORT_DAYS} days. Choose Replace or import fewer days.`,
+        `A plan can contain up to ${MAX_PLAN_DAYS} days. Choose Replace or import fewer days.`,
       );
     }
 

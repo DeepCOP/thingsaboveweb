@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import bible from '../../data/bible-index.json';
+import { MAX_PLAN_DAYS } from './constants';
 
-export const MAX_IMPORT_DAYS = 365;
 export const MAX_IMPORT_FILE_MB = 5;
 const MAX_ISSUES = 30;
 
@@ -246,8 +246,8 @@ export function parsePlanRows(rows: unknown[][]): ImportedPlan {
   for (let index = headerIndex + 1; index < rows.length; index++) {
     if (!dayColumns.some((column) => !isBlank(rows[index][column]))) continue;
     dayCount++;
-    if (dayCount > MAX_IMPORT_DAYS) {
-      throw new PlanImportError([`A plan can contain at most ${MAX_IMPORT_DAYS} days.`]);
+    if (dayCount > MAX_PLAN_DAYS) {
+      throw new PlanImportError([`A plan can contain at most ${MAX_PLAN_DAYS} days.`]);
     }
   }
 
@@ -368,10 +368,10 @@ export function parsePlanRows(rows: unknown[][]): ImportedPlan {
       !/^\d+$/.test(number) ||
       !Number.isSafeInteger(dayNumber) ||
       dayNumber < 1 ||
-      dayNumber > MAX_IMPORT_DAYS
+      dayNumber > MAX_PLAN_DAYS
     ) {
       addIssue(
-        `Row ${row}: "day_number" must be a whole number from 1 to ${MAX_IMPORT_DAYS}. Fill every day number or leave all of them blank.`,
+        `Row ${row}: "day_number" must be a whole number from 1 to ${MAX_PLAN_DAYS}. Fill every day number or leave all of them blank.`,
       );
     } else if (seenNumbers.has(dayNumber)) {
       addIssue(`Row ${row}: day ${dayNumber} is duplicated. Use one row per day.`);
