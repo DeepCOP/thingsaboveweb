@@ -41,6 +41,7 @@ export const getMyDevotionalPlans = async (): Promise<GetMyDevotionalPlans> => {
   if (error) throw error;
   if (!data?.length) return [];
 
+  // Count related rows on the server without downloading each draft's content.
   const { data: draftCounts, error: draftCountsError } = await supabase
     .from('devotional_plans')
     .select('id, devotional_days_draft(count)')
