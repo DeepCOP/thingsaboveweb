@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { ImportedPlan } from '@/src/lib/planImport';
 import ImportedCoverPreview from './ImportedCoverPreview';
+import { MAX_PLAN_DAYS } from '../lib/constants';
 
 type Props = {
   onImport: (plan: ImportedPlan, mode: 'append' | 'replace') => void;
@@ -101,7 +102,7 @@ export default function PlanImportDialog({
     (plan?.days.length ?? 0) +
     (mode === 'existing' && importMode === 'append' ? existingDayCount : 0);
   const hasImportedDays = (plan?.days.length ?? 0) > 0;
-  const exceedsDayLimit = resultingDayCount > 365;
+  const exceedsDayLimit = resultingDayCount > MAX_PLAN_DAYS;
 
   function applyImport() {
     if (!plan || disabled || reading || exceedsDayLimit) return;
@@ -177,8 +178,8 @@ export default function PlanImportDialog({
                 </summary>
                 <ul className="mt-2 list-disc space-y-1 pl-5 leading-6">
                   <li>
-                    Use an .xlsx or UTF-8 .csv file up to 5 MB with one plan and at most 365 days.
-                    Save older .xls files as .xlsx first.
+                    Use an .xlsx or UTF-8 .csv file up to 5 MB with one plan and at most
+                    {MAX_PLAN_DAYS} days. Save older .xls files as .xlsx first.
                   </li>
                   <li>
                     Excel reads the Days worksheet when present. Otherwise, keep the plan in one
